@@ -1,0 +1,15 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Navigation Result</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+    <div class="container">
+        <h1>Route from {{ origin }} to {{ destination }}</h1>
+        <iframe src="{{ url_for('static', filename='route_map.html') }}" width="100%" height="600px" style="border:none;"></iframe>
+        <a href="{{ url_for('index') }}">← New Search</a>
+    </div>
+</body>
+</html>
