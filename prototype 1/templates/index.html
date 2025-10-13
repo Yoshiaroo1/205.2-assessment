@@ -1,28 +1,18 @@
 <!DOCTYPE html>
-<html lang="en">
+<html>
 <head>
-    <meta charset="UTF-8">
     <title>Smart Navigation</title>
-    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
 </head>
 <body>
-    <div class="container">
-        <h1>Smart Navigation</h1>
-        <form method="POST">
-            <label>Origin:</label>
-            <input type="text" name="origin" placeholder="e.g. Auckland Airport" required>
+    <h1>🚗 Smart Navigation with ML</h1>
+    <form method="POST">
+        <label>Origin:</label>
+        <input type="text" name="origin" placeholder="Auckland CBD" required><br><br>
 
-            <label>Destination:</label>
-            <input type="text" name="destination" placeholder="e.g. Sky Tower" required>
+        <label>Destination:</label>
+        <input type="text" name="destination" placeholder="Auckland Airport" required><br><br>
 
-            <button type="submit">Find Route</button>
-        </form>
-
-        {% if error %}
-        <div class="error">
-            <strong>Error:</strong> {{ error }}
-        </div>
-        {% endif %}
-    </div>
+        <input type="submit" value="Get Route">
+    </form>
 </body>
 </html>

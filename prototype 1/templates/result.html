@@ -1,15 +1,15 @@
 <!DOCTYPE html>
-<html lang="en">
+<html>
 <head>
-    <meta charset="UTF-8">
-    <title>Navigation Result</title>
-    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+  <title>Route Result</title>
+  <style>
+    iframe { width: 100%; height: 90vh; border: none; }
+  </style>
 </head>
 <body>
-    <div class="container">
-        <h1>Route from {{ origin }} to {{ destination }}</h1>
-        <iframe src="{{ url_for('static', filename='route_map.html') }}" width="100%" height="600px" style="border:none;"></iframe>
-        <a href="{{ url_for('index') }}">← New Search</a>
-    </div>
+  <h2>🗺️ ML-Optimized Route</h2>
+  <iframe src="{{ url_for('static', filename='route_map.html') }}"></iframe>
+  <br><a href="/">← Back</a>
 </body>
 </html>
+
