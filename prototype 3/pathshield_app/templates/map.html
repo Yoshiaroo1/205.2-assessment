@@ -1,0 +1,28 @@
+{% extends "base.html" %}
+{% block title %}Route Map{% endblock %}
+{% block content %}
+<h2>Find Your Path</h2>
+
+<form method="POST" action="{{ url_for('main.map_view') }}">
+    <input type="text" name="start" placeholder="Starting point" required>
+    <input type="text" name="end" placeholder="Destination" required>
+
+    <select name="mode" class="mode-select">
+        <option value="pedestrian">🚶 Pedestrian</option>
+        <option value="car">🚗 Car</option>
+        <option value="bike">🚴 Bike</option>
+    </select>
+
+    <button type="submit">Generate Route</button>
+</form>
+
+{% if route %}
+<div class="result-box">
+    <h3>Generated Route:</h3>
+    <p><strong>Start:</strong> {{ route.start }}</p>
+    <p><strong>End:</strong> {{ route.end }}</p>
+    <p><strong>Mode:</strong> {{ route.mode }}</p>
+</div>
+{% endif %}
+{% endblock %}
+

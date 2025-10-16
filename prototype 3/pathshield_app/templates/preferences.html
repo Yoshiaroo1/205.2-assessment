@@ -1,0 +1,26 @@
+{% extends "base.html" %}
+{% block title %}Preferences{% endblock %}
+{% block content %}
+<h2>User Preferences</h2>
+<p>By selecting your preferred options below, you can customize your experience with PathShield.</p>
+
+<form method="POST" action="{{ url_for('main.preferences') }}">
+    <label>How do you travel?</label>
+    <select name="travel_mode" class="mode-select">
+        <option value="pedestrian">🚶 Walking</option>
+        <option value="car">🚗 Driving</option>
+        <option value="bike">🚴 Biking</option>
+    </select>
+
+    <label>Theme:</label>
+    <select name="theme" class="mode-select">
+        <option value="light">🌤️ Light</option>
+        <option value="dark">🌙 Dark</option>
+        <option value="green" selected>🌿 Green</option>
+    </select>
+
+    <button type="submit">Save Preferences</button>
+</form>
+
+<p><a href="{{ url_for('main.dashboard') }}">← Back to Dashboard</a></p>
+{% endblock %}
