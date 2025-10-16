@@ -1,0 +1,13 @@
+{% extends "base.html" %}
+{% block title %}Dashboard{% endblock %}
+{% block content %}
+<h2>Hello, {{ username }} 👋</h2>
+<p>Welcome back to your dashboard!</p>
+
+<div class="dashboard-links">
+    <a href="{{ url_for('main.map_view') }}" class="dash-btn">🗺️ View Map</a>
+    <a href="{{ url_for('main.preferences') }}" class="dash-btn">⚙️ Preferences</a>
+    <a href="{{ url_for('main.logout') }}" class="dash-btn logout">🚪 Logout</a>
+</div>
+{% endblock %}
+
