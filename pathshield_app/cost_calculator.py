@@ -3,88 +3,82 @@ import pandas as pd
 import numpy as np
 from typing import Dict, List, Tuple, Optional
 
-class AucklandTransportCostCalculator:
+class AucklandDrivingCostCalculator:
     """
-    Cost calculator for public transport in Auckland, NZ
-    Uses AT HOP card pricing structure and fare rules
+    Driving cost calculator for Auckland, NZ
+    Calculates fuel, time, maintenance, and other driving-related costs
     """
     
-    def __init__(self, gtfs_data_path: str = "cleaned_output"):
+    def __init__(self):
         """
-        Initialize the cost calculator with GTFS data
+        Initialize the driving cost calculator with Auckland-specific data
+        """
+        # Current fuel prices in Auckland (NZD per liter)
+        self.fuel_prices = {
+            '91_unleaded': 2.85,
+            '95_premium': 3.05,
+            '98_premium': 3.15,
+            'diesel': 2.45,
+            'ev_charging': 0.28
+        }
+        
+        # Vehicle efficiency (km per liter or km per kWh for EVs)
+        self.vehicle_efficiency = {
+            'small_car': 15.0,
+            'medium_car': 12.0,
+            'large_car': 9.0,
+            'suv': 10.0,
+            'truck_ute': 8.0,
+            'ev_small': 6.5,
+            'ev_medium': 5.5,
+            'ev_large': 4.5
+        }
+        
+        # Auckland-specific costs (NZD)
+        self.auckland_costs = {
+            'hourly_wage': 25.0,
+            'vehicle_depreciation': 0.15,
+            'maintenance_cost': 0.08,
+            'insurance_cost': 0.05,
+            'registration_cost': 0.03, 
+            'parking_downtown': 8.0,
+            'parking_suburban': 3.0,
+        }
+        
+        # Auckland toll roads
+        self.toll_roads = {
+            'northern_gateway': 2.40,
+            'takaanini_tunnel': 2.10
+        }
+        
+        # Traffic patterns (average speed multipliers by time of day)
+        self.traffic_patterns = {
+            'early_morning': {'speed_multiplier': 1.2, 'hours': '4:00-6:00'},
+            'morning_peak': {'speed_multiplier': 0.6, 'hours': '6:00-9:00'},
+            'midday': {'speed_multiplier': 0.9, 'hours': '9:00-15:00'},
+            'afternoon_peak': {'speed_multiplier': 0.7, 'hours': '15:00-18:00'},
+            'evening': {'speed_multiplier': 1.1, 'hours': '18:00-22:00'},
+            'late_night': {'speed_multiplier': 1.3, 'hours': '22:00-4:00'}
+        }
+
+        self.base_speed = 50.0
+        
+    def calculate_distance(self, start_coords: Tuple[float, float], 
+                          end_coords: Tuple[float, float]) -> float:
+        """
+        Calculate driving distance between two points in kilometers
+        Uses Haversine formula for great-circle distance
         
         Args:
-            gtfs_data_path: Path to cleaned GTFS data
+            start_coords: (latitude, longitude) of start point
+            end_coords: (latitude, longitude) of end point
+            
+        Returns:
+            Distance in kilometers
         """
-
-        self.stops = gpd.read_file(f"{gtfs_data_path}/cleaned_stops.gpkg")
-        self.routes = gpd.read_file(f"{gtfs_data_path}/cleaned_shapes.gpkg")
-
-        try:
-            self.fare_attributes = pd.read_csv(f"{gtfs_data_path}/../geotagged_output/gtfs_agency.csv")
-            self.fare_rules = pd.read_csv(f"{gtfs_data_path}/../geotagged_output/gtfs_routes.csv")
-        except:
-            print("Warning: Could not load fare data, using default pricing")
-            self.fare_attributes = None
-            self.fare_rules = None
-
-        self.fare_structure = {
-            'adult': {
-                'base_fare': 1.0,
-                'per_km': 0.25,
-                'max_daily': 20.0,
-                'transfer_discount': 0.5
-            },
-            'child': {
-                'base_fare': 0.5,
-                'per_km': 0.12,
-                'max_daily': 10.0,
-                'transfer_discount': 0.5
-            },
-            'student': {
-                'base_fare': 0.75,
-                'per_km': 0.18,
-                'max_daily': 15.0,
-                'transfer_discount': 0.5
-            }
-        }
-
-        self.service_multipliers = {
-            'bus': 1.0,
-            'train': 1.2,
-            'ferry': 1.5,
-            'light_rail': 1.1
-        }
-
-        self.zones = self._calculate_zones()
+        lat1, lon1 = start_coords
+        lat2, lon2 = end_coords
         
-    def _calculate_zones(self) -> gpd.GeoDataFrame:
-        """
-        Calculate fare zones based on distance from CBD
-        Returns a GeoDataFrame with zone boundaries
-        """
-        auckland_cbd = (174.7633, -36.8485)
-
-        stops_copy = self.stops.copy()
-        stops_copy['distance_from_cbd'] = stops_copy.apply(
-            lambda row: self._calculate_distance(
-                auckland_cbd[0], auckland_cbd[1], 
-                row['stop_lon'], row['stop_lat']
-            ), axis=1
-        )
-
-        stops_copy['zone'] = pd.cut(
-            stops_copy['distance_from_cbd'],
-            bins=[0, 5, 10, 20, 50, float('inf')],
-            labels=['Zone 1', 'Zone 2', 'Zone 3', 'Zone 4', 'Zone 5']
-        )
-        
-        return stops_copy[['stop_id', 'zone', 'distance_from_cbd']]
-    
-    def _calculate_distance(self, lon1: float, lat1: float, lon2: float, lat2: float) -> float:
-        """
-        Calculate great-circle distance between two points in kilometers
-        """
         R = 6371
         
         dlat = np.radians(lat2 - lat1)
@@ -95,212 +89,343 @@ class AucklandTransportCostCalculator:
              np.sin(dlon/2) * np.sin(dlon/2))
         
         c = 2 * np.arctan2(np.sqrt(a), np.sqrt(1-a))
-        return R * c
+        distance_km = R * c
+        
+        return distance_km
     
-    def calculate_route_cost(self, 
-                           start_stop_id: str, 
-                           end_stop_id: str, 
-                           passenger_type: str = 'adult',
-                           service_type: str = 'bus',
-                           transfers: int = 0,
-                           time_of_day: str = 'peak') -> Dict:
+    def estimate_travel_time(self, distance_km: float, 
+                           time_of_day: str = 'midday',
+                           route_efficiency: float = 1.0) -> Dict:
         """
-        Calculate the cost for a single journey
+        Estimate travel time based on distance and traffic conditions
         
         Args:
-            start_stop_id: Starting stop ID
-            end_stop_id: Ending stop ID
-            passenger_type: 'adult', 'child', or 'student'
-            service_type: 'bus', 'train', 'ferry', 'light_rail'
-            transfers: Number of transfers
-            time_of_day: 'peak' or 'off_peak'
+            distance_km: Distance in kilometers
+            time_of_day: Traffic condition period
+            route_efficiency: Multiplier for route quality (0.8-1.2)
             
         Returns:
-            Dictionary with cost breakdown
+            Dictionary with time estimates
         """
-        if passenger_type not in self.fare_structure:
-            raise ValueError(f"Invalid passenger type: {passenger_type}")
-        
-        if service_type not in self.service_multipliers:
-            raise ValueError(f"Invalid service type: {service_type}")
-        
-        start_stop = self.stops[self.stops['stop_id'] == start_stop_id]
-        end_stop = self.stops[self.stops['stop_id'] == end_stop_id]
-        
-        if len(start_stop) == 0 or len(end_stop) == 0:
-            raise ValueError("Invalid stop IDs provided")
-        
-        start_coords = (start_stop.iloc[0]['stop_lon'], start_stop.iloc[0]['stop_lat'])
-        end_coords = (end_stop.iloc[0]['stop_lon'], end_stop.iloc[0]['stop_lat'])
+        if time_of_day not in self.traffic_patterns:
+            time_of_day = 'midday'
 
-        distance_km = self._calculate_distance(
-            start_coords[0], start_coords[1],
-            end_coords[0], end_coords[1]
+        traffic_multiplier = self.traffic_patterns[time_of_day]['speed_multiplier']
+
+        adjusted_speed = self.base_speed * traffic_multiplier * route_efficiency
+
+        travel_time_hours = distance_km / adjusted_speed
+        travel_time_minutes = travel_time_hours * 60
+        
+        return {
+            'travel_time_hours': round(travel_time_hours, 2),
+            'travel_time_minutes': round(travel_time_minutes, 2),
+            'average_speed_kmh': round(adjusted_speed, 1),
+            'time_of_day': time_of_day
+        }
+    
+    def calculate_fuel_cost(self, distance_km: float, 
+                          vehicle_type: str, 
+                          fuel_type: str) -> Dict:
+        """
+        Calculate fuel/electricity cost for a journey
+        
+        Args:
+            distance_km: Distance in kilometers
+            vehicle_type: Type of vehicle
+            fuel_type: Type of fuel/power
+            
+        Returns:
+            Dictionary with fuel cost breakdown
+        """
+        if vehicle_type not in self.vehicle_efficiency:
+            raise ValueError(f"Unknown vehicle type: {vehicle_type}")
+        
+        if fuel_type not in self.fuel_prices:
+            raise ValueError(f"Unknown fuel type: {fuel_type}")
+        
+        efficiency = self.vehicle_efficiency[vehicle_type]
+        
+        if vehicle_type.startswith('ev_'):
+            kwh_used = distance_km / efficiency
+            fuel_cost = kwh_used * self.fuel_prices[fuel_type]
+            fuel_used_liters = 0
+            cost_per_km = fuel_cost / distance_km
+        else:
+            fuel_used_liters = distance_km / efficiency
+            fuel_cost = fuel_used_liters * self.fuel_prices[fuel_type]
+            kwh_used = 0
+            cost_per_km = fuel_cost / distance_km
+        
+        return {
+            'fuel_cost': round(fuel_cost, 2),
+            'fuel_used_liters': round(fuel_used_liters, 2),
+            'kwh_used': round(kwh_used, 2),
+            'efficiency': efficiency,
+            'cost_per_km': round(cost_per_km, 2),
+            'vehicle_type': vehicle_type,
+            'fuel_type': fuel_type
+        }
+    
+    def calculate_driving_cost(self,
+                             start_coords: Tuple[float, float],
+                             end_coords: Tuple[float, float],
+                             vehicle_type: str = 'medium_car',
+                             fuel_type: str = '91_unleaded',
+                             time_of_day: str = 'midday',
+                             include_parking: bool = False,
+                             parking_duration_hours: float = 2.0,
+                             include_tolls: bool = True,
+                             route_efficiency: float = 1.0) -> Dict:
+        """
+        Calculate total driving cost for a journey in Auckland
+        
+        Args:
+            start_coords: (latitude, longitude) of start point
+            end_coords: (latitude, longitude) of end point
+            vehicle_type: Type of vehicle
+            fuel_type: Type of fuel
+            time_of_day: Traffic condition period
+            include_parking: Whether to include parking costs
+            parking_duration_hours: Hours of parking needed
+            include_tolls: Whether to include toll road costs
+            route_efficiency: Route quality multiplier
+            
+        Returns:
+            Dictionary with detailed cost breakdown
+        """
+        distance_km = self.calculate_distance(start_coords, end_coords)
+
+        time_estimate = self.estimate_travel_time(distance_km, time_of_day, route_efficiency)
+
+        fuel_calc = self.calculate_fuel_cost(distance_km, vehicle_type, fuel_type)
+
+        time_cost = time_estimate['travel_time_hours'] * self.auckland_costs['hourly_wage']
+
+        operating_costs = (
+            distance_km * self.auckland_costs['vehicle_depreciation'] +
+            distance_km * self.auckland_costs['maintenance_cost'] +
+            distance_km * self.auckland_costs['insurance_cost'] +
+            distance_km * self.auckland_costs['registration_cost']
+        )
+        
+        # Calculate parking cost
+        parking_cost = 0
+        if include_parking:
+            cbd_center = (-36.8485, 174.7633)
+            cbd_distance = self.calculate_distance(end_coords, cbd_center)
+            
+            if cbd_distance <= 3.0:
+                parking_rate = self.auckland_costs['parking_downtown']
+            else:
+                parking_rate = self.auckland_costs['parking_suburban']
+            
+            parking_cost = parking_rate * parking_duration_hours
+
+        toll_cost = 0
+        if include_tolls:
+            toll_cost = self.estimate_toll_costs(start_coords, end_coords)
+
+        total_cost = (
+            fuel_calc['fuel_cost'] +
+            time_cost +
+            operating_costs +
+            parking_cost +
+            toll_cost
         )
 
-        fare_rules = self.fare_structure[passenger_type]
-        service_multiplier = self.service_multipliers[service_type]
-
-        time_multiplier = 1.0 if time_of_day == 'off_peak' else 1.1
-
-        base_cost = fare_rules['base_fare']
-        distance_cost = distance_km * fare_rules['per_km']
-
-        service_cost = (base_cost + distance_cost) * service_multiplier
-
-        time_adjusted_cost = service_cost * time_multiplier
-
-        transfer_discount = fare_rules['transfer_discount'] * transfers
-        final_cost = max(time_adjusted_cost - transfer_discount, base_cost)
-
-        capped_cost = min(final_cost, fare_rules['max_daily'])
+        cost_per_km = total_cost / distance_km if distance_km > 0 else 0
         
         return {
-            'base_fare': base_cost,
-            'distance_km': distance_km,
-            'distance_cost': distance_cost,
-            'service_multiplier': service_multiplier,
-            'time_multiplier': time_multiplier,
-            'transfer_discount': transfer_discount,
-            'final_cost': round(capped_cost, 2),
-            'service_type': service_type,
-            'passenger_type': passenger_type
+            'distance_km': round(distance_km, 2),
+            'travel_time_minutes': time_estimate['travel_time_minutes'],
+            'travel_time_hours': time_estimate['travel_time_hours'],
+            'average_speed_kmh': time_estimate['average_speed_kmh'],
+
+            'fuel_cost': fuel_calc['fuel_cost'],
+            'time_cost': round(time_cost, 2),
+            'operating_costs': round(operating_costs, 2),
+            'parking_cost': round(parking_cost, 2),
+            'toll_cost': round(toll_cost, 2),
+
+            'total_cost': round(total_cost, 2),
+            'cost_per_km': round(cost_per_km, 2),
+
+            'vehicle_type': vehicle_type,
+            'fuel_type': fuel_type,
+            'time_of_day': time_of_day,
+            'fuel_used_liters': fuel_calc['fuel_used_liters'],
+            'kwh_used': fuel_calc['kwh_used']
         }
     
-    def calculate_multi_leg_journey(self, 
-                                  journey_legs: List[Tuple[str, str, str]], 
-                                  passenger_type: str = 'adult',
-                                  time_of_day: str = 'peak') -> Dict:
+    def estimate_toll_costs(self, start_coords: Tuple[float, float],
+                          end_coords: Tuple[float, float]) -> float:
         """
-        Calculate cost for a journey with multiple legs/transfers
+        Estimate toll costs for a route in Auckland
         
         Args:
-            journey_legs: List of (start_stop, end_stop, service_type) tuples
-            passenger_type: Type of passenger
-            time_of_day: 'peak' or 'off_peak'
+            start_coords: Start coordinates
+            end_coords: End coordinates
             
         Returns:
-            Dictionary with total cost and breakdown
+            Total toll cost in NZD
         """
-        total_cost = 0
-        leg_breakdown = []
+        toll_cost = 0
         
-        for i, (start_stop, end_stop, service_type) in enumerate(journey_legs):
-            transfers = max(0, i)
-            
-            leg_cost = self.calculate_route_cost(
-                start_stop, end_stop, passenger_type, 
-                service_type, transfers, time_of_day
-            )
-            
-            total_cost += leg_cost['final_cost']
-            leg_breakdown.append({
-                'leg': i + 1,
-                'start_stop': start_stop,
-                'end_stop': end_stop,
-                'service_type': service_type,
-                'cost': leg_cost['final_cost'],
-                'distance_km': leg_cost['distance_km']
-            })
-
-        daily_cap = self.fare_structure[passenger_type]['max_daily']
-        final_total_cost = min(total_cost, daily_cap)
-        
-        return {
-            'total_cost': round(final_total_cost, 2),
-            'daily_cap_applied': final_total_cost < total_cost,
-            'leg_breakdown': leg_breakdown,
-            'number_of_legs': len(journey_legs),
-            'passenger_type': passenger_type
+        # Simplified toll detection - in production, use routing API
+        northern_gateway_bounds = {
+            'min_lat': -36.9, 'max_lat': -36.6,
+            'min_lon': 174.4, 'max_lon': 174.8
         }
+        # Check if route crosses toll area bounds
+        start_lat, start_lon = start_coords
+        end_lat, end_lon = end_coords
+        
+        if (northern_gateway_bounds['min_lat'] <= start_lat <= northern_gateway_bounds['max_lat'] and
+            northern_gateway_bounds['min_lon'] <= start_lon <= northern_gateway_bounds['max_lon']):
+            toll_cost += self.toll_roads['northern_gateway']
+        
+        return toll_cost
     
-    def optimize_route_cost(self, 
-                          start_stop_id: str, 
-                          end_stop_id: str,
-                          passenger_type: str = 'adult',
-                          max_transfers: int = 2) -> Dict:
+    def compare_vehicles(self,
+                        start_coords: Tuple[float, float],
+                        end_coords: Tuple[float, float],
+                        time_of_day: str = 'midday') -> Dict:
         """
-        Find the most cost-effective route between two stops
+        Compare costs across different vehicle types
         
         Args:
-            start_stop_id: Starting stop ID
-            end_stop_id: Ending stop ID
-            passenger_type: Type of passenger
-            max_transfers: Maximum allowed transfers
+            start_coords: Start coordinates
+            end_coords: End coordinates
+            time_of_day: Traffic condition
             
         Returns:
-            Dictionary with optimal route and cost
+            Dictionary with vehicle comparisons
         """
-
-        service_types = ['bus', 'train']
-        results = []
-        
-        for service_type in service_types:
-            try:
-                cost = self.calculate_route_cost(
-                    start_stop_id, end_stop_id, 
-                    passenger_type, service_type
-                )
-                results.append({
-                    'service_type': service_type,
-                    'cost': cost['final_cost'],
-                    'distance_km': cost['distance_km']
-                })
-            except Exception as e:
-                print(f"Could not calculate cost for {service_type}: {e}")
-
-        results.sort(key=lambda x: x['cost'])
-        
-        return {
-            'optimal_route': results[0] if results else None,
-            'all_options': results,
-            'start_stop': start_stop_id,
-            'end_stop': end_stop_id
-        }
-    
-    def get_stop_suggestions(self, query: str) -> List[Dict]:
-        """
-        Find stops matching a search query
-        
-        Args:
-            query: Search string (stop name or code)
-            
-        Returns:
-            List of matching stops
-        """
-        matches = self.stops[
-            self.stops['stop_name'].str.contains(query, case=False, na=False) |
-            self.stops['stop_code'].str.contains(query, case=False, na=False)
+        vehicles = [
+            ('small_car', '91_unleaded'),
+            ('medium_car', '91_unleaded'),
+            ('suv', '91_unleaded'),
+            ('ev_medium', 'ev_charging')
         ]
         
-        return matches[['stop_id', 'stop_name', 'stop_code', 'stop_lat', 'stop_lon']].to_dict('records')
+        comparisons = []
+        
+        for vehicle_type, fuel_type in vehicles:
+            try:
+                cost = self.calculate_driving_cost(
+                    start_coords, end_coords, vehicle_type, 
+                    fuel_type, time_of_day, include_parking=False
+                )
+                
+                comparisons.append({
+                    'vehicle_type': vehicle_type,
+                    'fuel_type': fuel_type,
+                    'total_cost': cost['total_cost'],
+                    'cost_per_km': cost['cost_per_km'],
+                    'travel_time_minutes': cost['travel_time_minutes'],
+                    'fuel_cost': cost['fuel_cost'],
+                    'operating_costs': cost['operating_costs']
+                })
+            except Exception as e:
+                print(f"Error calculating cost for {vehicle_type}: {e}")
+        
+        comparisons.sort(key=lambda x: x['total_cost'])
+        
+        return {
+            'optimal_vehicle': comparisons[0] if comparisons else None,
+            'all_vehicles': comparisons,
+            'distance_km': comparisons[0]['total_cost'] / comparisons[0]['cost_per_km'] if comparisons else 0
+        }
+    
+    def calculate_route_savings(self,
+                              current_route: Dict,
+                              optimized_route: Dict) -> Dict:
+        """
+        Calculate potential savings from route optimization
+        
+        Args:
+            current_route: Current route cost calculation
+            optimized_route: Optimized route cost calculation
+            
+        Returns:
+            Dictionary with savings breakdown
+        """
+        cost_saving = current_route['total_cost'] - optimized_route['total_cost']
+        time_saving = current_route['travel_time_minutes'] - optimized_route['travel_time_minutes']
+        
+        savings_percentage = (cost_saving / current_route['total_cost']) * 100 if current_route['total_cost'] > 0 else 0
+        
+        return {
+            'cost_saving_nzd': round(cost_saving, 2),
+            'time_saving_minutes': round(time_saving, 2),
+            'savings_percentage': round(savings_percentage, 1),
+            'fuel_saving': round(current_route['fuel_cost'] - optimized_route['fuel_cost'], 2),
+            'original_cost': current_route['total_cost'],
+            'optimized_cost': optimized_route['total_cost']
+        }
 
 if __name__ == "__main__":
 
-    calculator = AucklandTransportCostCalculator()
+    calculator = AucklandDrivingCostCalculator()
     
-    print("Auckland Transport Cost Calculator")
+    print("Auckland Driving Cost Calculator")
     print("=" * 50)
-
-    print("\n1. Simple Bus Journey:")
-    cost = calculator.calculate_route_cost(
-        start_stop_id="your_start_stop_id",
-        end_stop_id="your_end_stop_id",
-        passenger_type="adult",
-        service_type="bus"
+    
+    # Example coordinates (Auckland CBD to Auckland Airport)
+    auckland_cbd = (-36.8485, 174.7633)
+    auckland_airport = (-37.0082, 174.7850)
+    
+    # Standard journey calculation
+    print("\n1. CBD to Airport Journey:")
+    cost = calculator.calculate_driving_cost(
+        start_coords=auckland_cbd,
+        end_coords=auckland_airport,
+        vehicle_type='medium_car',
+        fuel_type='91_unleaded',
+        time_of_day='midday',
+        include_parking=True,
+        parking_duration_hours=2.0
     )
-    print(f"Cost: NZ${cost['final_cost']}")
-    print(f"Distance: {cost['distance_km']:.1f} km")
-
-    print("\n2. Multi-leg Journey (Bus + Train):")
-    journey_legs = [
-        ("stop1", "stop2", "bus"),
-        ("stop2", "stop3", "train")
-    ]
-    multi_cost = calculator.calculate_multi_leg_journey(journey_legs)
-    print(f"Total Cost: NZ${multi_cost['total_cost']}")
-
-    print("\n3. Route Cost Optimization:")
-    optimization = calculator.optimize_route_cost("stop1", "stop3")
-    print(f"Optimal service: {optimization['optimal_route']['service_type']}")
-    print(f"Optimal cost: NZ${optimization['optimal_route']['cost']}")
+    
+    print(f"Distance: {cost['distance_km']} km")
+    print(f"Travel Time: {cost['travel_time_minutes']} minutes")
+    print(f"Total Cost: NZ${cost['total_cost']}")
+    print(f"Cost Breakdown:")
+    print(f"Fuel: NZ${cost['fuel_cost']}")
+    print(f"Time: NZ${cost['time_cost']}")
+    print(f"Operating: NZ${cost['operating_costs']}")
+    print(f"Parking: NZ${cost['parking_cost']}")
+    print(f"Tolls: NZ${cost['toll_cost']}")
+    print(f"Cost per km: NZ${cost['cost_per_km']}")
+    
+    # Vehicle comparison
+    print("\n2. Vehicle Comparison:")
+    comparison = calculator.compare_vehicles(auckland_cbd, auckland_airport)
+    optimal = comparison['optimal_vehicle']
+    print(f"Optimal Vehicle: {optimal['vehicle_type']}")
+    print(f"Optimal Cost: NZ${optimal['total_cost']}")
+    
+    print("\nAll Vehicle Options:")
+    for vehicle in comparison['all_vehicles']:
+        print(f"   {vehicle['vehicle_type']}: NZ${vehicle['total_cost']} "
+              f"({vehicle['travel_time_minutes']} min)")
+    
+    # Traffic impact analysis
+    print("\n3. Traffic Impact Analysis:")
+    for time_slot in ['morning_peak', 'midday', 'evening']:
+        cost = calculator.calculate_driving_cost(
+            auckland_cbd, auckland_airport, time_of_day=time_slot
+        )
+        print(f"   {time_slot}: {cost['travel_time_minutes']} min, NZ${cost['total_cost']}")
+    
+    # Savings calculation
+    print("\n4. Route Optimization Savings:")
+    current_route = calculator.calculate_driving_cost(auckland_cbd, auckland_airport)
+    optimized_coords = (-36.9284, 174.7253)
+    optimized_route = calculator.calculate_driving_cost(auckland_cbd, optimized_coords)
+    
+    savings = calculator.calculate_route_savings(current_route, optimized_route)
+    print(f"Cost Savings: NZ${savings['cost_saving_nzd']}")
+    print(f"Time Savings: {savings['time_saving_minutes']} minutes")
+    print(f"Total Savings: {savings['savings_percentage']}%")
