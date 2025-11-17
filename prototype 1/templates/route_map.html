@@ -3,14 +3,6 @@
 <head>
     
     <meta http-equiv="content-type" content="text/html; charset=UTF-8" />
-    
-        <script>
-            L_NO_TOUCH = false;
-            L_DISABLE_3D = false;
-        </script>
-    
-    <style>html, body {width: 100%;height: 100%;margin: 0;padding: 0;}</style>
-    <style>#map {position:absolute;top:0;bottom:0;right:0;left:0;}</style>
     <script src="https://cdn.jsdelivr.net/npm/leaflet@1.9.3/dist/leaflet.js"></script>
     <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.2/dist/js/bootstrap.bundle.min.js"></script>
@@ -25,7 +17,7 @@
             <meta name="viewport" content="width=device-width,
                 initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
             <style>
-                #map_6ad8bf8a6f493af2c1cc792e177ee371 {
+                #map_33ed3ab7c0dc49dc884326cb68be291f {
                     position: relative;
                     width: 100.0%;
                     height: 100.0%;
@@ -34,24 +26,156 @@
                 }
                 .leaflet-container { font-size: 1rem; }
             </style>
+
+            <style>html, body {
+                width: 100%;
+                height: 100%;
+                margin: 0;
+                padding: 0;
+            }
+            </style>
+
+            <style>#map {
+                position:absolute;
+                top:0;
+                bottom:0;
+                right:0;
+                left:0;
+                }
+            </style>
+
+            <!-- Added styles for cost panel -->
+            <style>
+                .cost-panel {
+                    position: fixed;
+                    top: 20px;
+                    right: 20px;
+                    background: white;
+                    padding: 15px;
+                    border-radius: 8px;
+                    box-shadow: 0 2px 10px rgba(0,0,0,0.2);
+                    z-index: 1000;
+                    max-width: 300px;
+                    border-left: 4px solid #28a745;
+                }
+                .cost-panel h4 {
+                    margin-top: 0;
+                    color: #28a745;
+                    border-bottom: 1px solid #eee;
+                    padding-bottom: 8px;
+                }
+                .cost-breakdown {
+                    margin-top: 10px;
+                }
+                .cost-item {
+                    display: flex;
+                    justify-content: space-between;
+                    margin-bottom: 5px;
+                    padding: 3px 0;
+                    border-bottom: 1px dotted #eee;
+                }
+                .cost-total {
+                    font-weight: bold;
+                    font-size: 1.1em;
+                    color: #28a745;
+                    border-top: 2px solid #28a745;
+                    margin-top: 8px;
+                    padding-top: 8px;
+                }
+                .vehicle-selector {
+                    margin-bottom: 10px;
+                }
+                .vehicle-selector select {
+                    width: 100%;
+                    padding: 5px;
+                    border-radius: 4px;
+                    border: 1px solid #ddd;
+                }
+            </style>
+
+            <script>
+                L_NO_TOUCH = false;
+                L_DISABLE_3D = false;
+            </script>
+
         
 </head>
 <body>
     
     
-            <div class="folium-map" id="map_6ad8bf8a6f493af2c1cc792e177ee371" ></div>
+            <div class="folium-map" id="map_33ed3ab7c0dc49dc884326cb68be291f" ></div>
+            
+            <!-- Added Cost Panel -->
+            <div id="cost-panel" class="cost-panel">
+                <h4>Route Cost Analysis</h4>
+                <div class="vehicle-selector">
+                    <label for="vehicle-type">Vehicle Type:</label>
+                    <select id="vehicle-type">
+                        <option value="small_car">Small Car</option>
+                        <option value="medium_car" selected>Medium Car</option>
+                        <option value="large_car">Large Car</option>
+                        <option value="suv">SUV</option>
+                        <option value="truck_ute">Truck/Ute</option>
+                        <option value="ev_small">Small EV</option>
+                        <option value="ev_medium">Medium EV</option>
+                        <option value="ev_large">Large EV</option>
+                    </select>
+                </div>
+                <div id="cost-details">
+                    <div class="cost-item">
+                        <span>Distance:</span>
+                        <span id="cost-distance">-</span>
+                    </div>
+                    <div class="cost-item">
+                        <span>Travel Time:</span>
+                        <span id="cost-time">-</span>
+                    </div>
+                    <div class="cost-breakdown">
+                        <div class="cost-item">
+                            <span>Fuel Cost:</span>
+                            <span id="cost-fuel">-</span>
+                        </div>
+                        <div class="cost-item">
+                            <span>Time Cost:</span>
+                            <span id="cost-time-value">-</span>
+                        </div>
+                        <div class="cost-item">
+                            <span>Operating Costs:</span>
+                            <span id="cost-operating">-</span>
+                        </div>
+                        <div class="cost-item">
+                            <span>Toll Costs:</span>
+                            <span id="cost-toll">-</span>
+                        </div>
+                    </div>
+                    <div class="cost-item cost-total">
+                        <span>Total Cost:</span>
+                        <span id="cost-total">- NZD</span>
+                    </div>
+                    <div class="cost-item">
+                        <span>Cost per km:</span>
+                        <span id="cost-per-km">-</span>
+                    </div>
+                </div>
+                <div id="cost-loading" style="display: none; text-align: center;">
+                    <div class="spinner-border spinner-border-sm" role="status">
+                        <span class="visually-hidden">Loading...</span>
+                    </div>
+                    <span style="margin-left: 5px;">Calculating costs...</span>
+                </div>
+            </div>
         
 </body>
 <script>
     
     
-            var map_6ad8bf8a6f493af2c1cc792e177ee371 = L.map(
-                "map_6ad8bf8a6f493af2c1cc792e177ee371",
+            var map_33ed3ab7c0dc49dc884326cb68be291f = L.map(
+                "map_33ed3ab7c0dc49dc884326cb68be291f",
                 {
-                    center: [-36.92439695, 174.77697655],
+                    center: [-36.8081595, 174.7903341],
                     crs: L.CRS.EPSG3857,
                     ...{
-  "zoom": 12,
+  "zoom": 13,
   "zoomControl": true,
   "preferCanvas": false,
 }
@@ -63,7 +187,7 @@
 
         
     
-            var tile_layer_964b78a29c1edd5826ba59562d089088 = L.tileLayer(
+            var tile_layer_7dee656e3f7d06e503800331c06b0ded = L.tileLayer(
                 "https://tile.openstreetmap.org/{z}/{x}/{y}.png",
                 {
   "minZoom": 0,
@@ -80,23 +204,49 @@
             );
         
     
-            tile_layer_964b78a29c1edd5826ba59562d089088.addTo(map_6ad8bf8a6f493af2c1cc792e177ee371);
+            tile_layer_7dee656e3f7d06e503800331c06b0ded.addTo(map_33ed3ab7c0dc49dc884326cb68be291f);
         
     
-            var poly_line_6142aa05ccc7fa404fddebb5a7925204 = L.polyline(
-                [[-37.0010657, 174.7917932], [-37.0011598, 174.7914511], [-37.0016217, 174.7899305], [-37.0017864, 174.7893749], [-37.001837, 174.7892149], [-37.0017585, 174.789173], [-37.001451, 174.7890036], [-36.9985493, 174.7873836], [-36.9983762, 174.7872966], [-36.9963722, 174.7863246], [-36.9962846, 174.7862755], [-36.9940693, 174.7859985], [-36.9938743, 174.7860554], [-36.9916835, 174.7862139], [-36.9910438, 174.7861171], [-36.9909102, 174.7860944], [-36.9906431, 174.786049], [-36.977866, 174.7866168], [-36.973425, 174.788638], [-36.9724001, 174.7870314], [-36.9721773, 174.7868388], [-36.9718395, 174.7866479], [-36.9714158, 174.7864764], [-36.9676721, 174.785493], [-36.9662513, 174.7853346], [-36.965669, 174.7855275], [-36.9655829, 174.7855683], [-36.9653347, 174.7856869], [-36.9637055, 174.7864635], [-36.9621481, 174.7872053], [-36.9612869, 174.787619], [-36.9605059, 174.7879809], [-36.9579867, 174.789175], [-36.9575781, 174.7893645], [-36.9573197, 174.789488], [-36.9570524, 174.7896043], [-36.9567823, 174.789745], [-36.9563612, 174.7899644], [-36.9561502, 174.7900706], [-36.9552173, 174.7905189], [-36.9548961, 174.7906823], [-36.9542272, 174.7909871], [-36.9535462, 174.7913178], [-36.9528247, 174.7915721], [-36.9526034, 174.7915233], [-36.9525484, 174.7917444], [-36.9485306, 174.79345], [-36.9358423, 174.7891813], [-36.9305466, 174.7857167], [-36.9267464, 174.7781304], [-36.9243526, 174.7736838], [-36.9222654, 174.7672033], [-36.9222726, 174.767178], [-36.9222024, 174.7669883], [-36.9221507, 174.7669606], [-36.9219626, 174.7671146], [-36.9210574, 174.7674821], [-36.9210495, 174.7674717], [-36.9208797, 174.7674662], [-36.9208659, 174.7674836], [-36.9203569, 174.7676606], [-36.9201357, 174.7677497], [-36.9167318, 174.7684188], [-36.9162981, 174.7684697], [-36.9154522, 174.7686135], [-36.9146033, 174.7687816], [-36.9145277, 174.7687962], [-36.9142664, 174.7688449], [-36.912614, 174.7691633], [-36.9106599, 174.769556], [-36.9097557, 174.7698364], [-36.9092051, 174.7700219], [-36.9088604, 174.7701245], [-36.9081336, 174.7703538], [-36.9078947, 174.7704302], [-36.9071577, 174.7706667], [-36.9068388, 174.7707682], [-36.906181, 174.7709742], [-36.9049143, 174.7713633], [-36.9047167, 174.7714258], [-36.9037319, 174.7717355], [-36.9027289, 174.7720539], [-36.9026673, 174.7720733], [-36.9011373, 174.7725656], [-36.9002075, 174.7728643], [-36.8997483, 174.7730108], [-36.8996204, 174.7730534], [-36.8991987, 174.7731824], [-36.898392, 174.7734323], [-36.8981337, 174.7735161], [-36.8966371, 174.7739424], [-36.8959243, 174.7738913], [-36.8953291, 174.7739376], [-36.8943741, 174.7742115], [-36.8942461, 174.7742497], [-36.8935981, 174.7743979], [-36.8934219, 174.7744305], [-36.8933193, 174.7744496], [-36.8923846, 174.7746219], [-36.891179, 174.7748365], [-36.8901732, 174.7750122], [-36.8892767, 174.7751702], [-36.8888025, 174.7752594], [-36.8876993, 174.7754061], [-36.887479, 174.775436], [-36.8865465, 174.7755476], [-36.8851502, 174.7756328], [-36.8844723, 174.7756743], [-36.8835725, 174.7757333], [-36.8833152, 174.7757511], [-36.8823679, 174.7758206], [-36.8809646, 174.7759236], [-36.8808114, 174.7759442], [-36.8807527, 174.7759552], [-36.8799711, 174.7761261], [-36.8787897, 174.7763843], [-36.878526, 174.7764534], [-36.8784311, 174.7764741], [-36.875474, 174.777188], [-36.8748723, 174.7735782], [-36.8731984, 174.7740105], [-36.8723893, 174.7736803], [-36.8704925, 174.7720778], [-36.868512, 174.769569], [-36.8643745, 174.7665818], [-36.8635891, 174.7650672], [-36.8587888, 174.7660214], [-36.8549719, 174.7691713], [-36.8528891, 174.7673733], [-36.8524783, 174.7669032], [-36.8519884, 174.7663395], [-36.8516167, 174.7658948], [-36.8514858, 174.7658958], [-36.8494061, 174.7667504], [-36.8492274, 174.766115], [-36.8489962, 174.7652913], [-36.8487589, 174.7644525], [-36.8484705, 174.7635007], [-36.8482213, 174.7626084]],
-                {"bubblingMouseEvents": true, "color": "blue", "dashArray": null, "dashOffset": null, "fill": false, "fillColor": "blue", "fillOpacity": 0.2, "fillRule": "evenodd", "lineCap": "round", "lineJoin": "round", "noClip": false, "opacity": 0.7, "smoothFactor": 1.0, "stroke": true, "weight": 5}
-            ).addTo(map_6ad8bf8a6f493af2c1cc792e177ee371);
+            var poly_line_d718401f4b8df6d0dcdf7c7af47831c7 = L.polyline(
+                [[-36.8081712, 174.7904445], [-36.808304, 174.7901571], [-36.8080591, 174.7900422], [-36.8074649, 174.7897658], [-36.8070706, 174.7895771], [-36.8063072, 174.7892218], [-36.8059515, 174.7890574], [-36.8050975, 174.7886374], [-36.8007063, 174.7865937], [-36.8005832, 174.7865334], [-36.8004799, 174.7864828], [-36.7983825, 174.785342], [-36.7981586, 174.7849068], [-36.797999, 174.7840411], [-36.7977197, 174.7816528], [-36.7975552, 174.7802309], [-36.7973569, 174.7789982], [-36.7970883, 174.7786754], [-36.7960691, 174.7777928], [-36.7959259, 174.777678], [-36.7958046, 174.7775808], [-36.7949837, 174.7769201], [-36.7947591, 174.7767373], [-36.7943255, 174.7763872], [-36.7941543, 174.7761981], [-36.7938884, 174.7760027], [-36.7935, 174.7753075], [-36.7935642, 174.7750488], [-36.794351, 174.773524], [-36.7946383, 174.7730849], [-36.7947485, 174.7728885], [-36.7948796, 174.7726378], [-36.7965743, 174.7661883], [-36.7966073, 174.7661248], [-36.7970607, 174.7653618], [-36.7971283, 174.7652521], [-36.7976951, 174.7642208], [-36.8008585, 174.761909], [-36.8141562, 174.7523836], [-36.8153286, 174.7512021], [-36.8192965, 174.7501552], [-36.8215264, 174.7501731], [-36.836023, 174.7421023], [-36.8371418, 174.7416655], [-36.8430784, 174.7492784], [-36.8432255, 174.7496201], [-36.8570072, 174.7563205], [-36.8598353, 174.7608394], [-36.8612425, 174.763409], [-36.8637434, 174.7659184], [-36.8681654, 174.7692554], [-36.8699678, 174.7716448], [-36.8774499, 174.7821998], [-36.878658, 174.7833407], [-36.8871954, 174.7937019], [-36.8907979, 174.8000751], [-36.8930542, 174.8037033], [-36.8961985, 174.8073264], [-36.9007015, 174.8096908], [-36.9055662, 174.8150757], [-36.915521, 174.8288377], [-36.916357, 174.8322782], [-36.9227201, 174.8470786], [-36.9344043, 174.8518675], [-36.941845, 174.8542024], [-36.949265, 174.8574272], [-36.9547646, 174.8603316], [-36.9616749, 174.864877], [-36.9658712, 174.870427], [-36.9817383, 174.8826246], [-36.9878181, 174.8857209], [-36.9906948, 174.8871935], [-36.9942488, 174.8894379], [-36.9959558, 174.8838728], [-36.9959742, 174.8799055], [-36.9970271, 174.8705177], [-36.9983224, 174.8566148], [-36.9983603, 174.8528655], [-36.998479, 174.8518436], [-36.9999574, 174.8519958], [-37.000321, 174.8522197], [-37.0014376, 174.8528313], [-37.0017889, 174.8530067], [-37.0020741, 174.8531619], [-37.0028653, 174.8535937], [-37.0032134, 174.8537752], [-37.00539, 174.8549498], [-37.0059175, 174.85523], [-37.0060167, 174.8553016], [-37.0061754, 174.8553885], [-37.0105549, 174.8577932], [-37.0106922, 174.8578602], [-37.0108672, 174.8579599], [-37.0135246, 174.8593633], [-37.0140407, 174.8596409], [-37.0186645, 174.8621218], [-37.0189021, 174.8622517], [-37.0191029, 174.8623614], [-37.021235, 174.8635341], [-37.0215686, 174.8637195], [-37.0236157, 174.8648273], [-37.0241214, 174.8651005], [-37.0262449, 174.8662509], [-37.0263121, 174.8662829], [-37.0270437, 174.8666489], [-37.0271061, 174.8664705], [-37.0272808, 174.8645022], [-37.0273904, 174.8629118], [-37.0282179, 174.8634604], [-37.0311129, 174.8639539], [-37.0328176, 174.8628863], [-37.0322734, 174.8618041]],
+                {"bubblingMouseEvents": true, "color": "#ee0000", "dashArray": null, "dashOffset": null, "fill": false, "fillColor": "#ee0000", "fillOpacity": 0.2, "fillRule": "evenodd", "lineCap": "round", "lineJoin": "round", "noClip": false, "opacity": 0.6, "smoothFactor": 1.0, "stroke": true, "weight": 6}
+            ).addTo(map_33ed3ab7c0dc49dc884326cb68be291f);
         
     
-            var marker_f542db3ab25d3c1445eaa8d11e46dbbd = L.marker(
-                [-37.0003333, 174.7917688],
+            poly_line_d718401f4b8df6d0dcdf7c7af47831c7.bindTooltip(
+                `<div>
+                     Original route
+                 </div>`,
+                {
+  "sticky": true,
+}
+            );
+        
+    
+            var poly_line_989879f8b705fbc0e73afb5167c1ca52 = L.polyline(
+                [[-36.8081712, 174.7904445], [-36.808304, 174.7901571], [-36.8080591, 174.7900422], [-36.8074649, 174.7897658], [-36.8070706, 174.7895771], [-36.8063072, 174.7892218], [-36.8059515, 174.7890574], [-36.8050975, 174.7886374], [-36.8007063, 174.7865937], [-36.8005832, 174.7865334], [-36.8004799, 174.7864828], [-36.7983825, 174.785342], [-36.7981586, 174.7849068], [-36.797999, 174.7840411], [-36.7977197, 174.7816528], [-36.7975552, 174.7802309], [-36.7973569, 174.7789982], [-36.7970883, 174.7786754], [-36.7960691, 174.7777928], [-36.7959259, 174.777678], [-36.7958046, 174.7775808], [-36.7949837, 174.7769201], [-36.7947591, 174.7767373], [-36.7943255, 174.7763872], [-36.7941543, 174.7761981], [-36.7938884, 174.7760027], [-36.7935, 174.7753075], [-36.7935642, 174.7750488], [-36.794351, 174.773524], [-36.7946383, 174.7730849], [-36.7947485, 174.7728885], [-36.7948796, 174.7726378], [-36.7965743, 174.7661883], [-36.7966073, 174.7661248], [-36.7970607, 174.7653618], [-36.7971283, 174.7652521], [-36.7976951, 174.7642208], [-36.8008585, 174.761909], [-36.8141562, 174.7523836], [-36.8153286, 174.7512021], [-36.8192965, 174.7501552], [-36.8215264, 174.7501731], [-36.836023, 174.7421023], [-36.8371418, 174.7416655], [-36.8430784, 174.7492784], [-36.8432255, 174.7496201], [-36.8570072, 174.7563205], [-36.8598353, 174.7608394], [-36.8612425, 174.763409], [-36.8637434, 174.7659184], [-36.8681654, 174.7692554], [-36.8699678, 174.7716448], [-36.8774499, 174.7821998], [-36.878658, 174.7833407], [-36.8871954, 174.7937019], [-36.8907979, 174.8000751], [-36.8930542, 174.8037033], [-36.8961985, 174.8073264], [-36.9007015, 174.8096908], [-36.9055662, 174.8150757], [-36.915521, 174.8288377], [-36.916357, 174.8322782], [-36.9227201, 174.8470786], [-36.9344043, 174.8518675], [-36.941845, 174.8542024], [-36.949265, 174.8574272], [-36.9547646, 174.8603316], [-36.9616749, 174.864877], [-36.9658712, 174.870427], [-36.9817383, 174.8826246], [-36.9878181, 174.8857209], [-36.9906948, 174.8871935], [-36.9942488, 174.8894379], [-36.9959558, 174.8838728], [-36.9959742, 174.8799055], [-36.9970271, 174.8705177], [-36.9983224, 174.8566148], [-36.9983603, 174.8528655], [-36.998479, 174.8518436], [-36.9999574, 174.8519958], [-37.000321, 174.8522197], [-37.0014376, 174.8528313], [-37.0017889, 174.8530067], [-37.0020741, 174.8531619], [-37.0028653, 174.8535937], [-37.0032134, 174.8537752], [-37.00539, 174.8549498], [-37.0059175, 174.85523], [-37.0060167, 174.8553016], [-37.0061754, 174.8553885], [-37.0105549, 174.8577932], [-37.0106922, 174.8578602], [-37.0108672, 174.8579599], [-37.0135246, 174.8593633], [-37.0140407, 174.8596409], [-37.0186645, 174.8621218], [-37.0189021, 174.8622517], [-37.0191029, 174.8623614], [-37.021235, 174.8635341], [-37.0215686, 174.8637195], [-37.0236157, 174.8648273], [-37.0241214, 174.8651005], [-37.0262449, 174.8662509], [-37.0263121, 174.8662829], [-37.0270437, 174.8666489], [-37.0271061, 174.8664705], [-37.0272808, 174.8645022], [-37.0273904, 174.8629118], [-37.0282179, 174.8634604], [-37.0311129, 174.8639539], [-37.0328176, 174.8628863], [-37.0322734, 174.8618041]],
+                {"bubblingMouseEvents": true, "color": "green", "dashArray": null, "dashOffset": null, "fill": false, "fillColor": "green", "fillOpacity": 0.2, "fillRule": "evenodd", "lineCap": "round", "lineJoin": "round", "noClip": false, "opacity": 0.8, "smoothFactor": 1.0, "stroke": true, "weight": 6}
+            ).addTo(map_33ed3ab7c0dc49dc884326cb68be291f);
+        
+    
+            poly_line_989879f8b705fbc0e73afb5167c1ca52.bindTooltip(
+                `<div>
+                     ML-adjusted route
+                 </div>`,
+                {
+  "sticky": true,
+}
+            );
+        
+    
+            var marker_b5f7e59c2c445c6513ac8f2280b94024 = L.marker(
+                [-36.8081595, 174.7903341],
                 {
 }
-            ).addTo(map_6ad8bf8a6f493af2c1cc792e177ee371);
+            ).addTo(map_33ed3ab7c0dc49dc884326cb68be291f);
         
     
-            var icon_ef490603fceb97da40ea60903546ce1d = L.AwesomeMarkers.icon(
+            var icon_767d850584dd38c229b48498655c97a0 = L.AwesomeMarkers.icon(
                 {
   "markerColor": "green",
   "iconColor": "white",
@@ -107,34 +257,34 @@
             );
         
     
-        var popup_88b359e9756b8f0af02d4b2b181bfe19 = L.popup({
+        var popup_41d6ba6c3efd86773205ddb755c77955 = L.popup({
   "maxWidth": "100%",
 });
 
         
             
-                var html_78a17671c80b7a29a2d668b79a77fc33 = $(`<div id="html_78a17671c80b7a29a2d668b79a77fc33" style="width: 100.0%; height: 100.0%;">Origin</div>`)[0];
-                popup_88b359e9756b8f0af02d4b2b181bfe19.setContent(html_78a17671c80b7a29a2d668b79a77fc33);
+                var html_8346d42956d6ffdd240e8824cec5b0b2 = $(`<div id="html_8346d42956d6ffdd240e8824cec5b0b2" style="width: 100.0%; height: 100.0%;">Origin</div>`)[0];
+                popup_41d6ba6c3efd86773205ddb755c77955.setContent(html_8346d42956d6ffdd240e8824cec5b0b2);
             
         
 
-        marker_f542db3ab25d3c1445eaa8d11e46dbbd.bindPopup(popup_88b359e9756b8f0af02d4b2b181bfe19)
+        marker_b5f7e59c2c445c6513ac8f2280b94024.bindPopup(popup_41d6ba6c3efd86773205ddb755c77955)
         ;
 
         
     
     
-                marker_f542db3ab25d3c1445eaa8d11e46dbbd.setIcon(icon_ef490603fceb97da40ea60903546ce1d);
+                marker_b5f7e59c2c445c6513ac8f2280b94024.setIcon(icon_767d850584dd38c229b48498655c97a0);
             
     
-            var marker_c01cb5ed373bd74b09ff0cb68022f20a = L.marker(
-                [-36.8484606, 174.7621843],
+            var marker_57f6f2d1c9eab54c8290b733146395d1 = L.marker(
+                [-37.0318096, 174.8608675],
                 {
 }
-            ).addTo(map_6ad8bf8a6f493af2c1cc792e177ee371);
+            ).addTo(map_33ed3ab7c0dc49dc884326cb68be291f);
         
     
-            var icon_3a7c74b0fd96a5c3f18dfdce30823e48 = L.AwesomeMarkers.icon(
+            var icon_af4e3f70ca9ab08463a688061fd153af = L.AwesomeMarkers.icon(
                 {
   "markerColor": "red",
   "iconColor": "white",
@@ -145,24 +295,111 @@
             );
         
     
-        var popup_d7345881396712ecc0100c57e1550c24 = L.popup({
+        var popup_8393a3db1e27e126bd4ab6a1ecfe3a37 = L.popup({
   "maxWidth": "100%",
 });
 
         
             
-                var html_b847067c72c28944ea608aa71e8e50a9 = $(`<div id="html_b847067c72c28944ea608aa71e8e50a9" style="width: 100.0%; height: 100.0%;">Destination</div>`)[0];
-                popup_d7345881396712ecc0100c57e1550c24.setContent(html_b847067c72c28944ea608aa71e8e50a9);
+                var html_fa47a7d6f11c7a90313425333d210270 = $(`<div id="html_fa47a7d6f11c7a90313425333d210270" style="width: 100.0%; height: 100.0%;">Destination</div>`)[0];
+                popup_8393a3db1e27e126bd4ab6a1ecfe3a37.setContent(html_fa47a7d6f11c7a90313425333d210270);
             
         
 
-        marker_c01cb5ed373bd74b09ff0cb68022f20a.bindPopup(popup_d7345881396712ecc0100c57e1550c24)
+        marker_57f6f2d1c9eab54c8290b733146395d1.bindPopup(popup_8393a3db1e27e126bd4ab6a1ecfe3a37)
         ;
 
         
     
     
-                marker_c01cb5ed373bd74b09ff0cb68022f20a.setIcon(icon_3a7c74b0fd96a5c3f18dfdce30823e48);
+                marker_57f6f2d1c9eab54c8290b733146395d1.setIcon(icon_af4e3f70ca9ab08463a688061fd153af);
             
 </script>
+
+<!-- Added JavaScript for cost calculation -->
+<script>
+    // Function to calculate route cost
+    function calculateRouteCost() {
+        const vehicleType = document.getElementById('vehicle-type').value;
+        const startCoords = [-36.8081595, 174.7903341]; // Origin coordinates from map
+        const endCoords = [-37.0318096, 174.8608675]; // Destination coordinates from map
+        
+        // Show loading state
+        document.getElementById('cost-loading').style.display = 'block';
+        document.getElementById('cost-details').style.opacity = '0.5';
+        
+        const requestData = {
+            start_coords: startCoords,
+            end_coords: endCoords,
+            vehicle_type: vehicleType,
+            fuel_type: vehicleType.startsWith('ev_') ? 'ev_charging' : '91_unleaded',
+            time_of_day: 'midday',
+            include_parking: false,
+            include_tolls: true
+        };
+        
+        fetch('/api/calculate-cost', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify(requestData)
+        })
+        .then(response => response.json())
+        .then(data => {
+            // Hide loading state
+            document.getElementById('cost-loading').style.display = 'none';
+            document.getElementById('cost-details').style.opacity = '1';
+            
+            if (data.success) {
+                displayCostResults(data.data);
+            } else {
+                console.error('Cost calculation failed:', data.error);
+                displayError('Failed to calculate costs');
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            document.getElementById('cost-loading').style.display = 'none';
+            document.getElementById('cost-details').style.opacity = '1';
+            displayError('Network error occurred');
+        });
+    }
+    
+    // Function to display cost results
+    function displayCostResults(costData) {
+        document.getElementById('cost-distance').textContent = costData.distance_km + ' km';
+        document.getElementById('cost-time').textContent = costData.travel_time_minutes + ' min';
+        document.getElementById('cost-fuel').textContent = '$' + costData.fuel_cost;
+        document.getElementById('cost-time-value').textContent = '$' + costData.time_cost;
+        document.getElementById('cost-operating').textContent = '$' + costData.operating_costs;
+        document.getElementById('cost-toll').textContent = '$' + costData.toll_cost;
+        document.getElementById('cost-total').textContent = '$' + costData.total_cost;
+        document.getElementById('cost-per-km').textContent = '$' + costData.cost_per_km + '/km';
+    }
+    
+    // Function to display error
+    function displayError(message) {
+        document.getElementById('cost-distance').textContent = '-';
+        document.getElementById('cost-time').textContent = '-';
+        document.getElementById('cost-fuel').textContent = '-';
+        document.getElementById('cost-time-value').textContent = '-';
+        document.getElementById('cost-operating').textContent = '-';
+        document.getElementById('cost-toll').textContent = '-';
+        document.getElementById('cost-total').textContent = message;
+        document.getElementById('cost-per-km').textContent = '-';
+    }
+    
+    // Calculate costs when page loads and when vehicle type changes
+    document.addEventListener('DOMContentLoaded', function() {
+        calculateRouteCost();
+        
+        // Add event listener for vehicle type changes
+        document.getElementById('vehicle-type').addEventListener('change', calculateRouteCost);
+    });
+</script>
+
 </html>
+            <div style="position:fixed; bottom:20px; right:20px; z-index:9999; ">
+                <a style="font-size:60px;" href="/map" class="btn btn-success btn-lg">Compute New Route</a>
+            </div>

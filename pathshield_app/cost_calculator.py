@@ -1,12 +1,14 @@
 import geopandas as gpd
 import pandas as pd
+import json
 import numpy as np
 from typing import Dict, List, Tuple, Optional
+from datetime import datetime
 
 class AucklandDrivingCostCalculator:
     """
     Driving cost calculator for Auckland, NZ
-    Calculates fuel, time, maintenance, and other driving-related costs
+    Integrated into Pathshield Flask app
     """
     
     def __init__(self):
@@ -68,13 +70,6 @@ class AucklandDrivingCostCalculator:
         """
         Calculate driving distance between two points in kilometers
         Uses Haversine formula for great-circle distance
-        
-        Args:
-            start_coords: (latitude, longitude) of start point
-            end_coords: (latitude, longitude) of end point
-            
-        Returns:
-            Distance in kilometers
         """
         lat1, lon1 = start_coords
         lat2, lon2 = end_coords
@@ -98,20 +93,11 @@ class AucklandDrivingCostCalculator:
                            route_efficiency: float = 1.0) -> Dict:
         """
         Estimate travel time based on distance and traffic conditions
-        
-        Args:
-            distance_km: Distance in kilometers
-            time_of_day: Traffic condition period
-            route_efficiency: Multiplier for route quality (0.8-1.2)
-            
-        Returns:
-            Dictionary with time estimates
         """
         if time_of_day not in self.traffic_patterns:
             time_of_day = 'midday'
 
         traffic_multiplier = self.traffic_patterns[time_of_day]['speed_multiplier']
-
         adjusted_speed = self.base_speed * traffic_multiplier * route_efficiency
 
         travel_time_hours = distance_km / adjusted_speed
@@ -129,14 +115,6 @@ class AucklandDrivingCostCalculator:
                           fuel_type: str) -> Dict:
         """
         Calculate fuel/electricity cost for a journey
-        
-        Args:
-            distance_km: Distance in kilometers
-            vehicle_type: Type of vehicle
-            fuel_type: Type of fuel/power
-            
-        Returns:
-            Dictionary with fuel cost breakdown
         """
         if vehicle_type not in self.vehicle_efficiency:
             raise ValueError(f"Unknown vehicle type: {vehicle_type}")
@@ -179,25 +157,9 @@ class AucklandDrivingCostCalculator:
                              route_efficiency: float = 1.0) -> Dict:
         """
         Calculate total driving cost for a journey in Auckland
-        
-        Args:
-            start_coords: (latitude, longitude) of start point
-            end_coords: (latitude, longitude) of end point
-            vehicle_type: Type of vehicle
-            fuel_type: Type of fuel
-            time_of_day: Traffic condition period
-            include_parking: Whether to include parking costs
-            parking_duration_hours: Hours of parking needed
-            include_tolls: Whether to include toll road costs
-            route_efficiency: Route quality multiplier
-            
-        Returns:
-            Dictionary with detailed cost breakdown
         """
         distance_km = self.calculate_distance(start_coords, end_coords)
-
         time_estimate = self.estimate_travel_time(distance_km, time_of_day, route_efficiency)
-
         fuel_calc = self.calculate_fuel_cost(distance_km, vehicle_type, fuel_type)
 
         time_cost = time_estimate['travel_time_hours'] * self.auckland_costs['hourly_wage']
@@ -262,22 +224,14 @@ class AucklandDrivingCostCalculator:
                           end_coords: Tuple[float, float]) -> float:
         """
         Estimate toll costs for a route in Auckland
-        
-        Args:
-            start_coords: Start coordinates
-            end_coords: End coordinates
-            
-        Returns:
-            Total toll cost in NZD
         """
         toll_cost = 0
-        
-        # Simplified toll detection - in production, use routing API
+
         northern_gateway_bounds = {
             'min_lat': -36.9, 'max_lat': -36.6,
             'min_lon': 174.4, 'max_lon': 174.8
         }
-        # Check if route crosses toll area bounds
+        
         start_lat, start_lon = start_coords
         end_lat, end_lon = end_coords
         
@@ -293,14 +247,6 @@ class AucklandDrivingCostCalculator:
                         time_of_day: str = 'midday') -> Dict:
         """
         Compare costs across different vehicle types
-        
-        Args:
-            start_coords: Start coordinates
-            end_coords: End coordinates
-            time_of_day: Traffic condition
-            
-        Returns:
-            Dictionary with vehicle comparisons
         """
         vehicles = [
             ('small_car', '91_unleaded'),
@@ -337,95 +283,5 @@ class AucklandDrivingCostCalculator:
             'all_vehicles': comparisons,
             'distance_km': comparisons[0]['total_cost'] / comparisons[0]['cost_per_km'] if comparisons else 0
         }
-    
-    def calculate_route_savings(self,
-                              current_route: Dict,
-                              optimized_route: Dict) -> Dict:
-        """
-        Calculate potential savings from route optimization
-        
-        Args:
-            current_route: Current route cost calculation
-            optimized_route: Optimized route cost calculation
-            
-        Returns:
-            Dictionary with savings breakdown
-        """
-        cost_saving = current_route['total_cost'] - optimized_route['total_cost']
-        time_saving = current_route['travel_time_minutes'] - optimized_route['travel_time_minutes']
-        
-        savings_percentage = (cost_saving / current_route['total_cost']) * 100 if current_route['total_cost'] > 0 else 0
-        
-        return {
-            'cost_saving_nzd': round(cost_saving, 2),
-            'time_saving_minutes': round(time_saving, 2),
-            'savings_percentage': round(savings_percentage, 1),
-            'fuel_saving': round(current_route['fuel_cost'] - optimized_route['fuel_cost'], 2),
-            'original_cost': current_route['total_cost'],
-            'optimized_cost': optimized_route['total_cost']
-        }
 
-if __name__ == "__main__":
-
-    calculator = AucklandDrivingCostCalculator()
-    
-    print("Auckland Driving Cost Calculator")
-    print("=" * 50)
-    
-    # Example coordinates (Auckland CBD to Auckland Airport)
-    auckland_cbd = (-36.8485, 174.7633)
-    auckland_airport = (-37.0082, 174.7850)
-    
-    # Standard journey calculation
-    print("\n1. CBD to Airport Journey:")
-    cost = calculator.calculate_driving_cost(
-        start_coords=auckland_cbd,
-        end_coords=auckland_airport,
-        vehicle_type='medium_car',
-        fuel_type='91_unleaded',
-        time_of_day='midday',
-        include_parking=True,
-        parking_duration_hours=2.0
-    )
-    
-    print(f"Distance: {cost['distance_km']} km")
-    print(f"Travel Time: {cost['travel_time_minutes']} minutes")
-    print(f"Total Cost: NZ${cost['total_cost']}")
-    print(f"Cost Breakdown:")
-    print(f"Fuel: NZ${cost['fuel_cost']}")
-    print(f"Time: NZ${cost['time_cost']}")
-    print(f"Operating: NZ${cost['operating_costs']}")
-    print(f"Parking: NZ${cost['parking_cost']}")
-    print(f"Tolls: NZ${cost['toll_cost']}")
-    print(f"Cost per km: NZ${cost['cost_per_km']}")
-    
-    # Vehicle comparison
-    print("\n2. Vehicle Comparison:")
-    comparison = calculator.compare_vehicles(auckland_cbd, auckland_airport)
-    optimal = comparison['optimal_vehicle']
-    print(f"Optimal Vehicle: {optimal['vehicle_type']}")
-    print(f"Optimal Cost: NZ${optimal['total_cost']}")
-    
-    print("\nAll Vehicle Options:")
-    for vehicle in comparison['all_vehicles']:
-        print(f"   {vehicle['vehicle_type']}: NZ${vehicle['total_cost']} "
-              f"({vehicle['travel_time_minutes']} min)")
-    
-    # Traffic impact analysis
-    print("\n3. Traffic Impact Analysis:")
-    for time_slot in ['morning_peak', 'midday', 'evening']:
-        cost = calculator.calculate_driving_cost(
-            auckland_cbd, auckland_airport, time_of_day=time_slot
-        )
-        print(f"   {time_slot}: {cost['travel_time_minutes']} min, NZ${cost['total_cost']}")
-    
-    # Savings calculation
-    print("\n4. Route Optimization Savings:")
-    current_route = calculator.calculate_driving_cost(auckland_cbd, auckland_airport)
-    optimized_coords = (-36.9284, 174.7253)
-    optimized_route = calculator.calculate_driving_cost(auckland_cbd, optimized_coords)
-    
-    savings = calculator.calculate_route_savings(current_route, optimized_route)
-    print(f"Cost Savings: NZ${savings['cost_saving_nzd']}")
-    print(f"Time Savings: {savings['time_saving_minutes']} minutes")
-    print(f"Total Savings: {savings['savings_percentage']}%")
+cost_calculator = AucklandDrivingCostCalculator()
