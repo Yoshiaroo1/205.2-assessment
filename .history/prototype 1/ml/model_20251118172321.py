@@ -12,37 +12,36 @@ class ETAModel:
         self.model.fit(X, y)
         self.trained = True
 
-    def predict_eta(self, distance, hour, day):
-        """Predict travel time in minutes"""
+    def predict(self, distance, hour, day):
         if not self.trained:
             # fallback = 40 km/h average speed
             return (distance / 40) * 60
         X = np.array([[distance, hour, day]])
         return float(self.model.predict(X)[0])
-
-    def predict_route_with_costs(self, 
-                               start_coords: Tuple[float, float],
-                               end_coords: Tuple[float, float],
-                               hour: int,
-                               day: int,
-                               vehicle_type: str = 'medium_car',
-                               fuel_type: str = '91_unleaded',
-                               include_parking: bool = False,
-                               parking_duration_hours: float = 2.0,
-                               include_tolls: bool = True) -> Dict:
+    
+    def predict_with_cost(self, 
+                         start_coords: Tuple[float, float],
+                         end_coords: Tuple[float, float],
+                         hour: int,
+                         day: int,
+                         vehicle_type: str = 'medium_car',
+                         fuel_type: str = '91_unleaded',
+                         include_parking: bool = False,
+                         parking_duration_hours: float = 2.0,
+                         include_tolls: bool = True) -> Dict:
         """
-        Comprehensive prediction including both ETA and cost analysis
+        Enhanced prediction that returns both ETA and cost analysis
         """
         # Calculate distance
         distance_km = self.cost_calculator.calculate_distance(start_coords, end_coords)
         
         # Convert hour to time_of_day category
-        time_of_day = self._convert_hour_to_time_category(hour)
+        time_of_day = self._hour_to_time_period(hour)
         
-        # Predict ETA using the ML model
-        eta_minutes = self.predict_eta(distance_km, hour, day)
+        # Get ETA prediction (in minutes)
+        eta_minutes = self.predict(distance_km, hour, day)
         
-        # Calculate comprehensive costs
+        # Calculate comprehensive driving costs
         cost_analysis = self.cost_calculator.calculate_driving_cost(
             start_coords=start_coords,
             end_coords=end_coords,
@@ -55,31 +54,47 @@ class ETAModel:
             route_efficiency=1.0
         )
         
-        # Compare vehicles for optimal choice
+        # Compare with other vehicle types
         vehicle_comparison = self.cost_calculator.compare_vehicles(
             start_coords, end_coords, time_of_day
         )
         
         return {
-            'eta_minutes': round(eta_minutes, 2),
+            'eta_minutes': round(eta_minutes, 1),
             'eta_hours': round(eta_minutes / 60, 2),
             'distance_km': round(distance_km, 2),
-            'cost_analysis': cost_analysis,
-            'vehicle_comparison': vehicle_comparison,
-            'optimal_vehicle': vehicle_comparison['optimal_vehicle'],
-            'route_coordinates': {
-                'start': start_coords,
-                'end': end_coords
+            'time_period': time_of_day,
+            'hour_of_day': hour,
+            'day_of_week': day,
+            
+            # Cost breakdown
+            'cost_breakdown': {
+                'total_cost': cost_analysis['total_cost'],
+                'fuel_cost': cost_analysis['fuel_cost'],
+                'time_cost': cost_analysis['time_cost'],
+                'operating_costs': cost_analysis['operating_costs'],
+                'parking_cost': cost_analysis['parking_cost'],
+                'toll_cost': cost_analysis['toll_cost'],
+                'cost_per_km': cost_analysis['cost_per_km']
             },
-            'time_parameters': {
-                'hour': hour,
-                'day': day,
-                'time_of_day': time_of_day
-            }
+            
+            # Vehicle comparison
+            'vehicle_comparison': vehicle_comparison,
+            
+            # Fuel/efficiency info
+            'fuel_used_liters': cost_analysis['fuel_used_liters'],
+            'kwh_used': cost_analysis['kwh_used'],
+            'average_speed_kmh': cost_analysis['average_speed_kmh'],
+            
+            # Model info
+            'model_used': 'XGBoost' if self.trained else 'Fallback',
+            'confidence': 'high' if self.trained else 'low'
         }
-
-    def _convert_hour_to_time_category(self, hour: int) -> str:
-        """Convert hour of day to traffic pattern category"""
+    
+    def _hour_to_time_period(self, hour: int) -> str:
+        """
+        Convert hour of day to traffic time period
+        """
         if 4 <= hour < 6:
             return 'early_morning'
         elif 6 <= hour < 9:
@@ -92,27 +107,28 @@ class ETAModel:
             return 'evening'
         else:
             return 'late_night'
+    
+    def batch_predict_with_cost(self, routes: list) -> list:
+        """
+        Predict ETA and cost for multiple routes
+        """
+        results = []
+        for route in routes:
+            result = self.predict_with_cost(**route)
+            results.append(result)
+        return results
 
-    def get_cost_breakdown(self, total_cost: float, cost_analysis: Dict) -> Dict:
-        """Generate detailed cost breakdown for display"""
-        return {
-            'fuel_cost': cost_analysis['fuel_cost'],
-            'time_cost': cost_analysis['time_cost'],
-            'operating_costs': cost_analysis['operating_costs'],
-            'parking_cost': cost_analysis['parking_cost'],
-            'toll_cost': cost_analysis['toll_cost'],
-            'total_cost': total_cost,
-            'cost_per_km': cost_analysis['cost_per_km']
-        }
-
-# Integrated Cost Calculator Class (copied from your cost_calculator.py)
+# Integrated Cost Calculator Class
 class AucklandDrivingCostCalculator:
     """
     Driving cost calculator for Auckland, NZ
-    Integrated into the ETA model
+    Integrated into ETAModel for seamless cost calculations
     """
     
     def __init__(self):
+        """
+        Initialize the driving cost calculator with Auckland-specific data
+        """
         # Current fuel prices in Auckland (NZD per liter)
         self.fuel_prices = {
             '91_unleaded': 2.85,
@@ -165,7 +181,10 @@ class AucklandDrivingCostCalculator:
         
     def calculate_distance(self, start_coords: Tuple[float, float], 
                           end_coords: Tuple[float, float]) -> float:
-        """Calculate driving distance between two points in kilometers"""
+        """
+        Calculate driving distance between two points in kilometers
+        Uses Haversine formula for great-circle distance
+        """
         lat1, lon1 = start_coords
         lat2, lon2 = end_coords
         
@@ -186,7 +205,9 @@ class AucklandDrivingCostCalculator:
     def estimate_travel_time(self, distance_km: float, 
                            time_of_day: str = 'midday',
                            route_efficiency: float = 1.0) -> Dict:
-        """Estimate travel time based on distance and traffic conditions"""
+        """
+        Estimate travel time based on distance and traffic conditions
+        """
         if time_of_day not in self.traffic_patterns:
             time_of_day = 'midday'
 
@@ -206,7 +227,9 @@ class AucklandDrivingCostCalculator:
     def calculate_fuel_cost(self, distance_km: float, 
                           vehicle_type: str, 
                           fuel_type: str) -> Dict:
-        """Calculate fuel/electricity cost for a journey"""
+        """
+        Calculate fuel/electricity cost for a journey
+        """
         if vehicle_type not in self.vehicle_efficiency:
             raise ValueError(f"Unknown vehicle type: {vehicle_type}")
         
@@ -246,7 +269,9 @@ class AucklandDrivingCostCalculator:
                              parking_duration_hours: float = 2.0,
                              include_tolls: bool = True,
                              route_efficiency: float = 1.0) -> Dict:
-        """Calculate total driving cost for a journey in Auckland"""
+        """
+        Calculate total driving cost for a journey in Auckland
+        """
         distance_km = self.calculate_distance(start_coords, end_coords)
         time_estimate = self.estimate_travel_time(distance_km, time_of_day, route_efficiency)
         fuel_calc = self.calculate_fuel_cost(distance_km, vehicle_type, fuel_type)
@@ -292,13 +317,16 @@ class AucklandDrivingCostCalculator:
             'travel_time_minutes': time_estimate['travel_time_minutes'],
             'travel_time_hours': time_estimate['travel_time_hours'],
             'average_speed_kmh': time_estimate['average_speed_kmh'],
+
             'fuel_cost': fuel_calc['fuel_cost'],
             'time_cost': round(time_cost, 2),
             'operating_costs': round(operating_costs, 2),
             'parking_cost': round(parking_cost, 2),
             'toll_cost': round(toll_cost, 2),
+
             'total_cost': round(total_cost, 2),
             'cost_per_km': round(cost_per_km, 2),
+
             'vehicle_type': vehicle_type,
             'fuel_type': fuel_type,
             'time_of_day': time_of_day,
@@ -308,7 +336,9 @@ class AucklandDrivingCostCalculator:
     
     def estimate_toll_costs(self, start_coords: Tuple[float, float],
                           end_coords: Tuple[float, float]) -> float:
-        """Estimate toll costs for a route in Auckland"""
+        """
+        Estimate toll costs for a route in Auckland
+        """
         toll_cost = 0
 
         northern_gateway_bounds = {
@@ -329,7 +359,9 @@ class AucklandDrivingCostCalculator:
                         start_coords: Tuple[float, float],
                         end_coords: Tuple[float, float],
                         time_of_day: str = 'midday') -> Dict:
-        """Compare costs across different vehicle types"""
+        """
+        Compare costs across different vehicle types
+        """
         vehicles = [
             ('small_car', '91_unleaded'),
             ('medium_car', '91_unleaded'),
