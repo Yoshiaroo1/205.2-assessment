@@ -299,9 +299,4 @@ def calculate_driving_cost(start_coords: Tuple[float, float],
         time_of_day, include_parking, parking_duration_hours,
         include_tolls, route_efficiency
     )
-def compare_vehicles(start_coords: Tuple[float, float],
-                     end_coords: Tuple[float, float],
-                     time_of_day: str = 'midday') -> Dict:
-    return cost_calculator.compare_vehicles(
-        start_coords, end_coords, time_of_day
-    )
+

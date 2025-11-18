@@ -285,23 +285,3 @@ class AucklandDrivingCostCalculator:
         }
 
 cost_calculator = AucklandDrivingCostCalculator()
-def calculate_driving_cost(start_coords: Tuple[float, float],
-                           end_coords: Tuple[float, float],
-                           vehicle_type: str = 'medium_car',
-                           fuel_type: str = '91_unleaded',
-                           time_of_day: str = 'midday',
-                           include_parking: bool = False,
-                           parking_duration_hours: float = 2.0,
-                           include_tolls: bool = True,
-                           route_efficiency: float = 1.0) -> Dict:
-    return cost_calculator.calculate_driving_cost(
-        start_coords, end_coords, vehicle_type, fuel_type,
-        time_of_day, include_parking, parking_duration_hours,
-        include_tolls, route_efficiency
-    )
-def compare_vehicles(start_coords: Tuple[float, float],
-                     end_coords: Tuple[float, float],
-                     time_of_day: str = 'midday') -> Dict:
-    return cost_calculator.compare_vehicles(
-        start_coords, end_coords, time_of_day
-    )
