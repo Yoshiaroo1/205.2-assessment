@@ -34,121 +34,12 @@
                 }
                 .leaflet-container { font-size: 1rem; }
             </style>
-
-            <!-- Cost Panel Styles -->
-            <style>
-                .cost-panel {
-                    position: fixed;
-                    top: 20px;
-                    right: 20px;
-                    background: white;
-                    padding: 15px;
-                    border-radius: 8px;
-                    box-shadow: 0 2px 10px rgba(0,0,0,0.2);
-                    z-index: 1000;
-                    max-width: 300px;
-                    border-left: 4px solid #28a745;
-                }
-                .cost-panel h4 {
-                    margin-top: 0;
-                    color: #28a745;
-                    border-bottom: 1px solid #eee;
-                    padding-bottom: 8px;
-                }
-                .cost-breakdown {
-                    margin-top: 10px;
-                }
-                .cost-item {
-                    display: flex;
-                    justify-content: space-between;
-                    margin-bottom: 5px;
-                    padding: 3px 0;
-                    border-bottom: 1px dotted #eee;
-                }
-                .cost-total {
-                    font-weight: bold;
-                    font-size: 1.1em;
-                    color: #28a745;
-                    border-top: 2px solid #28a745;
-                    margin-top: 8px;
-                    padding-top: 8px;
-                }
-                .vehicle-selector {
-                    margin-bottom: 10px;
-                }
-                .vehicle-selector select {
-                    width: 100%;
-                    padding: 5px;
-                    border-radius: 4px;
-                    border: 1px solid #ddd;
-                }
-            </style>
         
 </head>
 <body>
     
     
             <div class="folium-map" id="map_ad4cbb89a76ed3293f49870a2df19e9c" ></div>
-
-            <!-- Cost Panel -->
-            <div id="cost-panel" class="cost-panel">
-                <h4>Route Cost Analysis</h4>
-                <div class="vehicle-selector">
-                    <label for="vehicle-type">Vehicle Type:</label>
-                    <select id="vehicle-type">
-                        <option value="small_car">Small Car</option>
-                        <option value="medium_car" selected>Medium Car</option>
-                        <option value="large_car">Large Car</option>
-                        <option value="suv">SUV</option>
-                        <option value="truck_ute">Truck/Ute</option>
-                        <option value="ev_small">Small EV</option>
-                        <option value="ev_medium">Medium EV</option>
-                        <option value="ev_large">Large EV</option>
-                    </select>
-                </div>
-                <div id="cost-details">
-                    <div class="cost-item">
-                        <span>Distance:</span>
-                        <span id="cost-distance">-</span>
-                    </div>
-                    <div class="cost-item">
-                        <span>Travel Time:</span>
-                        <span id="cost-time">-</span>
-                    </div>
-                    <div class="cost-breakdown">
-                        <div class="cost-item">
-                            <span>Fuel Cost:</span>
-                            <span id="cost-fuel">-</span>
-                        </div>
-                        <div class="cost-item">
-                            <span>Time Cost:</span>
-                            <span id="cost-time-value">-</span>
-                        </div>
-                        <div class="cost-item">
-                            <span>Operating Costs:</span>
-                            <span id="cost-operating">-</span>
-                        </div>
-                        <div class="cost-item">
-                            <span>Toll Costs:</span>
-                            <span id="cost-toll">-</span>
-                        </div>
-                    </div>
-                    <div class="cost-item cost-total">
-                        <span>Total Cost:</span>
-                        <span id="cost-total">- NZD</span>
-                    </div>
-                    <div class="cost-item">
-                        <span>Cost per km:</span>
-                        <span id="cost-per-km">-</span>
-                    </div>
-                </div>
-                <div id="cost-loading" style="display: none; text-align: center;">
-                    <div class="spinner-border spinner-border-sm" role="status">
-                        <span class="visually-hidden">Loading...</span>
-                    </div>
-                    <span style="margin-left: 5px;">Calculating costs...</span>
-                </div>
-            </div>
         
 </body>
 <script>
@@ -300,91 +191,8 @@
                 marker_f5228aee06b0f4be601781aed702a4ce.setIcon(icon_f2aa8fa027f47afc7942d724bf70aaf0);
             
 </script>
-
-<!-- Cost Calculator JavaScript -->
-<script>
-    // Function to calculate route cost
-    function calculateRouteCost() {
-        const vehicleType = document.getElementById('vehicle-type').value;
-        const startCoords = [-36.8086433, 174.7901089]; // Origin coordinates from map
-        const endCoords = [-37.0315267, 174.8685369]; // Destination coordinates from map
-        
-        // Show loading state
-        document.getElementById('cost-loading').style.display = 'block';
-        document.getElementById('cost-details').style.opacity = '0.5';
-        
-        const requestData = {
-            start_coords: startCoords,
-            end_coords: endCoords,
-            vehicle_type: vehicleType,
-            fuel_type: vehicleType.startsWith('ev_') ? 'ev_charging' : '91_unleaded',
-            time_of_day: 'midday',
-            include_parking: false,
-            include_tolls: true
-        };
-        
-        fetch('/api/calculate-cost', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-            },
-            body: JSON.stringify(requestData)
-        })
-        .then(response => response.json())
-        .then(data => {
-            // Hide loading state
-            document.getElementById('cost-loading').style.display = 'none';
-            document.getElementById('cost-details').style.opacity = '1';
-            
-            if (data.success) {
-                displayCostResults(data.data);
-            } else {
-                console.error('Cost calculation failed:', data.error);
-                displayError('Failed to calculate costs');
-            }
-        })
-        .catch(error => {
-            console.error('Error:', error);
-            document.getElementById('cost-loading').style.display = 'none';
-            document.getElementById('cost-details').style.opacity = '1';
-            displayError('Network error occurred');
-        });
-    }
-    
-    // Function to display cost results
-    function displayCostResults(costData) {
-        document.getElementById('cost-distance').textContent = costData.distance_km + ' km';
-        document.getElementById('cost-time').textContent = costData.travel_time_minutes + ' min';
-        document.getElementById('cost-fuel').textContent = '$' + costData.fuel_cost;
-        document.getElementById('cost-time-value').textContent = '$' + costData.time_cost;
-        document.getElementById('cost-operating').textContent = '$' + costData.operating_costs;
-        document.getElementById('cost-toll').textContent = '$' + costData.toll_cost;
-        document.getElementById('cost-total').textContent = '$' + costData.total_cost;
-        document.getElementById('cost-per-km').textContent = '$' + costData.cost_per_km + '/km';
-    }
-    
-    // Function to display error
-    function displayError(message) {
-        document.getElementById('cost-distance').textContent = '-';
-        document.getElementById('cost-time').textContent = '-';
-        document.getElementById('cost-fuel').textContent = '-';
-        document.getElementById('cost-time-value').textContent = '-';
-        document.getElementById('cost-operating').textContent = '-';
-        document.getElementById('cost-toll').textContent = '-';
-        document.getElementById('cost-total').textContent = message;
-        document.getElementById('cost-per-km').textContent = '-';
-    }
-    
-    // Calculate costs when page loads and when vehicle type changes
-    document.addEventListener('DOMContentLoaded', function() {
-        calculateRouteCost();
-        
-        // Add event listener for vehicle type changes
-        document.getElementById('vehicle-type').addEventListener('change', calculateRouteCost);
-    });
-</script>
-
 </html>
             <div style="position:fixed; bottom:20px; right:20px; z-index:9999; ">
                 <a style="font-size:60px;" href="/map" class="btn btn-success btn-lg">Compute New Route</a>
             </div>
+            
