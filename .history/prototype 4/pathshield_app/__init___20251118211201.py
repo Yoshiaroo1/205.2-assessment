@@ -20,7 +20,7 @@ def create_app():
     # Register API blueprint conditionally
     register_api_blueprint(app)
 
-    return app
+    return app  # This was missing!
 
 def register_api_blueprint(app):
     """Register API blueprint if available"""

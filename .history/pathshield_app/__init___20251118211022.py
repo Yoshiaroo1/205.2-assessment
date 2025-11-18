@@ -25,7 +25,7 @@ def create_app():
 def register_api_blueprint(app):
     """Register API blueprint if available"""
     try:
-        from pathshield_app.routes_ai import api_bp
+        from pathshield_app.routes_api import api_bp
         app.register_blueprint(api_bp)
         app.logger.info("✅ Cost Calculator API routes registered successfully")
     except ImportError as e:
