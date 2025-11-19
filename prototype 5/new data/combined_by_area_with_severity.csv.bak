@@ -1,0 +1,399 @@
+Area Unit,Total Victimisations,total_crimes,severity
+Abbotts Park.,9,9,Medium
+Akarana.,22,22,High
+Albany.,72,72,Very High
+Ambury.,7,7,Medium
+Aorere.,23,23,High
+Arahanga.,8,8,Medium
+Arch Hill.,12,12,Medium
+Ardmore.,10,10,Medium
+Army Bay.,10,10,Medium
+Auckland Central East.,334,334,Very High
+Auckland Central West.,582,582,Very High
+Auckland Harbourside.,298,298,Very High
+Avondale South.,8,8,Medium
+Avondale West.,20,20,High
+Awaruku.,7,7,Medium
+Awhitu.,4,4,Low
+Balmoral.,16,16,High
+Baverstock Oaks.,13,13,Medium
+Bays-Waiheke Island.,1,1,Low
+Bayswater.,5,5,Low
+Beachhaven North.,37,37,Very High
+Beachhaven South.,17,17,High
+Beachlands-Maraetai.,20,20,High
+Beaumont.,26,26,Very High
+Birdwood East.,4,4,Low
+Birdwood West.,4,4,Low
+Birkdale North.,16,16,High
+Birkdale South.,6,6,Low
+Birkenhead East.,13,13,Medium
+Bledisloe Park.,40,40,Very High
+Blockhouse Bay.,14,14,High
+Bombay.,4,4,Low
+Bremner.,3,3,Low
+Browns Bay.,27,27,Very High
+Buckland.,2,2,Low
+Bucklands Beach South.,5,5,Low
+Bucklands and Eastern Beaches.,10,10,Medium
+Burbank.,19,19,High
+Burswood.,9,9,Medium
+Campbells Bay.,9,9,Medium
+Cape Rodney South.,6,6,Low
+Cape Rodney.,5,5,Low
+Castor Bay.,1,1,Low
+Chelsea.,6,6,Low
+Clendon North.,15,15,High
+Clendon South.,39,39,Very High
+Clevedon.,15,15,High
+Clover Park.,15,15,High
+Cockle Bay.,5,5,Low
+Crown Hill.,2,2,Low
+Crum Park.,3,3,Low
+Dairy Flat-Redvale.,5,5,Low
+Dannemora.,27,27,Very High
+Dingwall.,44,44,Very High
+Donegal Park.,48,48,Very High
+Drury.,26,26,Very High
+Durham Green.,9,9,Medium
+Eden Road-Hill Top.,3,3,Low
+Eden Terrace.,15,15,High
+Edgewater.,24,24,High
+Edmonton.,29,29,Very High
+Ellerslie North.,7,7,Medium
+Ellerslie South.,17,17,High
+Elsmore Park.,11,11,Medium
+Epsom Central.,9,9,Medium
+Epsom North.,12,12,Medium
+Epsom South.,3,3,Low
+Fairburn.,48,48,Very High
+Fairdene.,68,68,Very High
+Fairview.,8,8,Medium
+Favona North.,4,4,Low
+Favona South.,13,13,Medium
+Favona West.,19,19,High
+Ferguson.,19,19,High
+Ferndale.,11,11,Medium
+Forrest Hill.,5,5,Low
+Freemans Bay.,54,54,Very High
+Fruitvale.,20,20,High
+Glamorgan.,3,3,Low
+Glen Eden East.,50,50,Very High
+Glen Innes East.,10,10,Medium
+Glen Innes North.,6,6,Low
+Glen Innes West.,58,58,Very High
+Glenavon.,45,45,Very High
+Glenbrook.,10,10,Medium
+Glendene North.,16,16,High
+Glendene South.,17,17,High
+Glendhu.,15,15,High
+Glendowie.,5,5,Low
+Glenfield Central.,29,29,Very High
+Glenfield North.,23,23,High
+Golfland.,2,2,Low
+Grafton East.,109,109,Very High
+Grafton West.,29,29,Very High
+Grange.,9,9,Medium
+Great Barrier Island.,4,4,Low
+Green Bay.,18,18,High
+Greenhithe.,8,8,Medium
+Greenmount.,26,26,Very High
+Grey Lynn East.,32,32,Very High
+Grey Lynn West.,10,10,Medium
+Gulf Harbour.,11,11,Medium
+Half Moon Bay.,2,2,Low
+Hamlin.,37,37,Very High
+Harania East.,18,18,High
+Harania North.,12,12,Medium
+Harania West.,40,40,Very High
+Hatfields Beach.,2,2,Low
+Hauraki.,8,8,Medium
+Helensville South.,1,1,Low
+Helensville.,12,12,Medium
+Henderson North.,86,86,Very High
+Henderson South.,147,147,Very High
+Henderson West.,3,3,Low
+Herald.,1,1,Low
+Herne Bay.,4,4,Low
+Highbrook.,14,14,High
+Highland Park.,12,12,Medium
+Hillpark.,58,58,Very High
+Hillsborough East.,9,9,Medium
+Hillsborough West.,14,14,High
+Hingaia.,7,7,Medium
+Hobsonville East.,29,29,Very High
+Hobsonville South.,4,4,Low
+Homai East.,46,46,Very High
+Homai West.,11,11,Medium
+Howick Central.,16,16,High
+Howick South.,12,12,Medium
+Howick West.,4,4,Low
+Huapai.,13,13,Medium
+Hunua.,4,4,Low
+Hyperion.,11,11,Medium
+Inlet-Kaipara Harbour South.,1,1,Low
+Inlet-Waitemata Harbour.,3,3,Low
+Kaipatiki.,24,24,High
+Karekare.,9,9,Medium
+Kaukapakapa.,3,3,Low
+Kauri Park.,19,19,High
+Kaurilands.,6,6,Low
+Kawakawa-Orere.,4,4,Low
+Kelston Central.,25,25,High
+Kilkenny.,3,3,Low
+Kingdale.,84,84,Very High
+Kingseat.,13,13,Medium
+Kingsland.,27,27,Very High
+Kohimarama East.,3,3,Low
+Kohimarama West.,1,1,Low
+Kohuora.,30,30,Very High
+Konini.,2,2,Low
+Kumeu East.,10,10,Medium
+Kumeu West.,6,6,Low
+Laingholm.,2,2,Low
+Lake Pupuke.,24,24,High
+Leabank.,50,50,Very High
+Long Bay.,9,9,Medium
+Lucken Point.,10,10,Medium
+Lynfield North.,13,13,Medium
+Lynfield South.,8,8,Medium
+Lynnmall.,104,104,Very High
+Mahurangi.,1,1,Low
+Mairangi Bay.,10,10,Medium
+Mangere Bridge.,34,34,Very High
+Mangere Central.,63,63,Very High
+Mangere East.,37,37,Very High
+Mangere South.,93,93,Very High
+Mangere Station.,23,23,High
+Manly.,8,8,Medium
+Manukau Central.,342,342,Very High
+Manurewa Central.,112,112,Very High
+Manurewa East.,57,57,Very High
+Mascot.,35,35,Very High
+Massey Park.,19,19,High
+Massey West.,19,19,High
+Matakana.,7,7,Medium
+Matipo.,6,6,Low
+Maungawhau.,9,9,Medium
+McLaren Park.,12,12,Medium
+Mcleod.,17,17,High
+Meadowbank North.,5,5,Low
+Meadowbank South.,10,10,Medium
+Meadowland.,8,8,Medium
+Mellons Bay.,7,7,Medium
+Middlemore.,73,73,Very High
+Mill Road.,7,7,Medium
+Millhouse.,9,9,Medium
+Mission Bay.,18,18,High
+Mission Heights.,1,1,Low
+Monarch Park.,7,7,Medium
+Mt Albert Central.,16,16,High
+Mt Eden East.,4,4,Low
+Mt Eden North.,137,137,Very High
+Mt Eden South.,15,15,High
+Mt Hobson.,16,16,High
+Mt St John.,11,11,Medium
+Mt Victoria.,14,14,High
+Mt Wellington Domain.,24,24,High
+Mt Wellington North.,24,24,High
+Mt Wellington South.,109,109,Very High
+Mt Wellington West.,3,3,Low
+Muriwai Beach.,1,1,Low
+Muriwai Valley.,2,2,Low
+Murrays Bay.,7,7,Medium
+Murvale.,10,10,Medium
+Narrow Neck.,13,13,Medium
+New Lynn North.,29,29,Very High
+New Lynn South.,23,23,High
+New Windsor.,14,14,High
+Newmarket.,64,64,Very High
+Newton.,85,85,Very High
+North Harbour East.,19,19,High
+North Harbour West.,10,10,Medium
+Northcote South.,14,14,High
+Northcross.,9,9,Medium
+Oaktree.,8,8,Medium
+Ocean View.,7,7,Medium
+Oceanic-Auckland Region East.,3,3,Low
+Omaha.,2,2,Low
+One Tree Hill Central.,11,11,Medium
+One Tree Hill East.,19,19,High
+Onehunga North East.,2,2,Low
+Onehunga North West.,18,18,High
+Onehunga South East.,68,68,Very High
+Onehunga South West.,18,18,High
+Opaheke.,13,13,Medium
+Opanuku.,4,4,Low
+Orakei North.,13,13,Medium
+Orakei South.,2,2,Low
+Oranga.,13,13,Medium
+Oratia.,13,13,Medium
+Orewa West.,2,2,Low
+Orewa.,30,30,Very High
+Ormiston.,63,63,Very High
+Otahuhu East.,4,4,Low
+Otahuhu North.,33,33,Very High
+Otahuhu West.,169,169,Very High
+Otara East.,24,24,High
+Otara North.,58,58,Very High
+Otara South.,13,13,Medium
+Otara West.,23,23,High
+Otimai.,8,8,Medium
+Owairaka East.,6,6,Low
+Owairaka West.,9,9,Medium
+Paerata-Cape Hill.,8,8,Medium
+Pahurehure.,9,9,Medium
+Pakuranga Central.,33,33,Very High
+Pakuranga East.,18,18,High
+Pakuranga North.,3,3,Low
+Palm Heights.,3,3,Low
+Panmure Basin.,15,15,High
+Papakura Central.,96,96,Very High
+Papakura East.,44,44,Very High
+Papakura North East.,29,29,Very High
+Papakura North.,62,62,Very High
+Papakura South.,12,12,Medium
+Papatoetoe Central.,67,67,Very High
+Papatoetoe East.,34,34,Very High
+Papatoetoe North.,86,86,Very High
+Papatoetoe West.,37,37,Very High
+Parakai Rural.,1,1,Low
+Parakai Urban.,4,4,Low
+Paremoremo East.,222,222,Very High
+Parnell East.,3,3,Low
+Parnell West.,53,53,Very High
+Parrs Park West.,8,8,Medium
+Parrs Park.,10,10,Medium
+Patumahoe.,3,3,Low
+Penrose.,25,25,High
+Pigeon Mountain North.,7,7,Medium
+Pigeon Mountain South.,2,2,Low
+Pinehill.,8,8,Medium
+Point Chevalier East.,51,51,Very High
+Point Chevalier South.,20,20,High
+Point Chevalier West.,4,4,Low
+Point England.,20,20,High
+Point View.,10,10,Medium
+Ponsonby East.,31,31,Very High
+Ponsonby West.,5,5,Low
+Puhinui North.,19,19,High
+Puhinui South.,58,58,Very High
+Pukekohe North.,74,74,Very High
+Pukekohe West.,27,27,Very High
+Randwick Park.,21,21,High
+Ranui Domain.,32,32,Very High
+Ranui South.,10,10,Medium
+Red Beach East.,5,5,Low
+Red Beach West.,8,8,Medium
+Red Hill.,8,8,Medium
+Redoubt North.,15,15,High
+Redoubt South.,12,12,Medium
+Remuera South.,30,30,Very High
+Remuera West.,7,7,Medium
+Rewarewa.,7,7,Medium
+Rewiti.,2,2,Low
+Riverhead Urban.,7,7,Medium
+Roberton.,46,46,Very High
+Rongomai.,39,39,Very High
+Rosebank.,15,15,High
+Rosehill.,33,33,Very High
+Rothesay Bay.,5,5,Low
+Rowandale.,23,23,High
+Royal Heights.,31,31,Very High
+Royal Oak.,25,25,High
+Royal Road West.,7,7,Medium
+Runciman.,3,3,Low
+Sandringham East.,13,13,Medium
+Sandringham North.,35,35,Very High
+Sandringham West.,27,27,Very High
+Seacliffe.,7,7,Medium
+Shelly Park.,3,3,Low
+Sherbourne.,19,19,High
+Silverdale Central.,36,36,Very High
+Silverdale North.,5,5,Low
+Silverdale South.,1,1,Low
+Snells Beach.,7,7,Medium
+South Head.,6,6,Low
+South Waiuku.,2,2,Low
+Springleigh.,18,18,High
+St Heliers.,8,8,Medium
+St Johns.,4,4,Low
+St Lukes.,20,20,High
+St Marys.,17,17,High
+Stanley Bay.,2,2,Low
+Stanmore Bay East.,12,12,Medium
+Stanmore Bay West.,2,2,Low
+Starling Park.,14,14,High
+Stonefields.,1,1,Low
+Sturges North.,19,19,High
+Sunnybrae.,18,18,High
+Sunnyhills.,10,10,Medium
+Sunnynook.,12,12,Medium
+Sunnyvale.,21,21,High
+Surrey Crescent.,28,28,Very High
+Swanson South.,1,1,Low
+Swanson.,18,18,High
+Tahekeroa.,3,3,Low
+Takanini North.,61,61,Very High
+Takanini South.,101,101,Very High
+Takanini West.,25,25,High
+Takapuna Central.,54,54,Very High
+Tamaki.,11,11,Medium
+Tangutu.,10,10,Medium
+Target Road.,16,16,High
+Tauhoa-Puhoi.,10,10,Medium
+Taupaki.,2,2,Low
+Te Atatu Central.,34,34,Very High
+Te Papapa.,21,21,High
+Three Kings.,29,29,Very High
+Tidal-Eastern Bays.,1,1,Low
+Tidal-Manukau Harbour.,1,1,Low
+Tidal-Waitemata Harbour.,1,1,Low
+Titirangi South.,3,3,Low
+Torbay.,12,12,Medium
+Totara Heights.,16,16,High
+Tuff Crater.,37,37,Very High
+Turanga.,2,2,Low
+Unsworth Heights.,8,8,Medium
+Urlich.,8,8,Medium
+Vipond.,2,2,Low
+Viscount.,26,26,Very High
+Wade Heads.,14,14,High
+Waiake.,11,11,Medium
+Waiata.,2,2,Low
+Waiheke Island.,24,24,High
+Waikowhai East.,7,7,Medium
+Waikowhai West.,3,3,Low
+Waima.,5,5,Low
+Waimauku.,1,1,Low
+Waimumu North.,17,17,High
+Waimumu South.,17,17,High
+Waipareira West.,1,1,Low
+Waitakere West.,1,1,Low
+Waitakere.,3,3,Low
+Waitaramoa.,6,6,Low
+Waiuku East.,18,18,High
+Waiuku West.,38,38,Very High
+Waiwera.,2,2,Low
+Wakeling.,21,21,High
+Walmsley.,16,16,High
+Warkworth.,14,14,High
+Waterview.,16,16,High
+Wattle Farm.,23,23,High
+Weiti River.,12,12,Medium
+Wellsford.,7,7,Medium
+Wesley.,29,29,Very High
+West Harbour.,18,18,High
+Westgate.,45,45,Very High
+Westlake.,82,82,Very High
+Westmere.,13,13,Medium
+Weymouth East.,30,30,Very High
+Weymouth West.,20,20,High
+Whangapouri Creek.,5,5,Low
+Whenuapai West.,44,44,Very High
+Windsor Park.,30,30,Very High
+Windy Ridge.,8,8,Medium
+Wiri.,118,118,Very High
+Witheford.,1,1,Low
+Woodglen.,19,19,High
+Wymondley.,5,5,Low
