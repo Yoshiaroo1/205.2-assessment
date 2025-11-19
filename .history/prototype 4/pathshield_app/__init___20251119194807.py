@@ -7,11 +7,6 @@ load_dotenv()
 db = SQLAlchemy()
 
 def create_app():
-    # Configure encoding first
-    import sys
-    if sys.stdout.encoding != 'UTF-8':
-        sys.stdout.reconfigure(encoding='utf-8')
-    
     app = Flask(__name__)
     app.config.from_object('pathshield_app.config.Config')
 
@@ -25,14 +20,14 @@ def create_app():
     # Register API blueprint conditionally
     register_api_blueprint(app)
 
-    return app
-
-def register_api_blueprint(app):
-    try:
+    def register_api_blueprint(app):
+    
+try:
         from pathshield_app.routes_ai import api_bp
         app.register_blueprint(api_bp)
-        # Safe logging without emoji
-        app.logger.info("Cost Calculator API routes registered successfully")
+        app.logger.info("✅ Cost Calculator API routes registered successfully")
     except ImportError as e:
-        app.logger.warning(f"Cost Calculator API not available: {e}")
+        app.logger.warning(f"⚠️ Cost Calculator API not available: {e}")
+
+    return app
 

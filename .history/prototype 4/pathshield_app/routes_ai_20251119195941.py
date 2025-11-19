@@ -50,8 +50,7 @@ def generate_route(start_address, end_address, mode='walk'):
             print("Downloading road network (first time only)... this may take a few minutes")
             G = ox.graph_from_place("Auckland, New Zealand", network_type="drive")
             ox.save_graphml(G, CACHE_GRAPH)
-            print("Graph cached to disk.")
-        return G
+            print("✅
 
     G = load_graph()
     G = ox.add_edge_speeds(G)
@@ -70,9 +69,9 @@ def generate_route(start_address, end_address, mode='walk'):
         if "GEOMETRY" in traffic.columns and "geometry" not in traffic.columns:
             traffic = traffic.rename(columns={"GEOMETRY": "geometry"}).set_geometry("geometry")
         traffic = traffic.to_crs(graph_crs)
-        print("Loaded traffic data.")
+        print("✅ Loaded traffic data.")
     except Exception as e:
-        print(f"Could not load traffic data: {e}")
+        print(f"⚠️ Could not load traffic data: {e}")
         traffic = None
         
     # ---------------------------------------------------------------------
@@ -94,14 +93,14 @@ def generate_route(start_address, end_address, mode='walk'):
             pred_speed = model.predict(features)[0]
             return max(pred_speed, 1.0)
         except Exception as e:
-            print(f"Prediction failed for edge: {e}")
+            print(f"⚠️ Prediction failed for edge: {e}")
             return edge_row.get("speed_kph", 40)
 
 
     def get_route_map(origin, destination):
         """Generate map showing both original and ML-adjusted routes."""
 
-        print("Computing routes...")
+        print("🚗 Computing routes...")
 
         # Geocode addresses
         orig_point = ox.geocode(origin)

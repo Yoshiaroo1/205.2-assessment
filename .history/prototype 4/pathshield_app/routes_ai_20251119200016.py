@@ -47,7 +47,7 @@ def generate_route(start_address, end_address, mode='walk'):
             print("Loading cached graph...")
             G = ox.load_graphml(CACHE_GRAPH)
         else:
-            print("Downloading road network (first time only)... this may take a few minutes")
+            print("🌏 Downloading road network (first time only)... this may take a few minutes")
             G = ox.graph_from_place("Auckland, New Zealand", network_type="drive")
             ox.save_graphml(G, CACHE_GRAPH)
             print("Graph cached to disk.")
@@ -101,7 +101,7 @@ def generate_route(start_address, end_address, mode='walk'):
     def get_route_map(origin, destination):
         """Generate map showing both original and ML-adjusted routes."""
 
-        print("Computing routes...")
+        print("🚗 Computing routes...")
 
         # Geocode addresses
         orig_point = ox.geocode(origin)

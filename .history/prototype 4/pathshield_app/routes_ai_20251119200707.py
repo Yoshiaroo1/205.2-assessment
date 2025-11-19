@@ -101,7 +101,7 @@ def generate_route(start_address, end_address, mode='walk'):
     def get_route_map(origin, destination):
         """Generate map showing both original and ML-adjusted routes."""
 
-        print("Computing routes...")
+        print(" Computing routes...")
 
         # Geocode addresses
         orig_point = ox.geocode(origin)
