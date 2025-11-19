@@ -70,6 +70,7 @@ class AucklandDrivingCostCalculator:
         }
 
         self.base_speed = 50.0
+    
 
 
     

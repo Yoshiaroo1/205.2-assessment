@@ -69,9 +69,17 @@ class AucklandDrivingCostCalculator:
             'late_night': {'speed_multiplier': 1.3, 'hours': '22:00-4:00'}
         }
 
+ def _load_fuel_prices(self) -> Dict:
+    """Load fuel prices from environment with defaults"""
+    return {
+        '91_unleaded': float(os.getenv('FUEL_91_PRICE', '2.85')),
+        '95_premium': float(os.getenv('FUEL_95_PRICE', '3.05')),
+        '98_premium': float(os.getenv('FUEL_98_PRICE', '3.15')),
+        'diesel': float(os.getenv('DIESEL_PRICE', '2.45')),
+        'ev_charging': float(os.getenv('EV_CHARGING_PRICE', '0.28'))
+    }
+
         self.base_speed = 50.0
-
-
     
     @lru_cache(maxsize=128)
     def calculate_distance(self, start_coords: Tuple[float, float], 

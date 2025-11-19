@@ -69,9 +69,9 @@ class AucklandDrivingCostCalculator:
             'late_night': {'speed_multiplier': 1.3, 'hours': '22:00-4:00'}
         }
 
+        
+
         self.base_speed = 50.0
-
-
     
     @lru_cache(maxsize=128)
     def calculate_distance(self, start_coords: Tuple[float, float], 

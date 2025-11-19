@@ -71,7 +71,6 @@ class AucklandDrivingCostCalculator:
 
         self.base_speed = 50.0
 
-
     
     @lru_cache(maxsize=128)
     def calculate_distance(self, start_coords: Tuple[float, float], 

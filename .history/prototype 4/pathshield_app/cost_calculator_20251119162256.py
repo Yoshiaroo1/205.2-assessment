@@ -70,8 +70,35 @@ class AucklandDrivingCostCalculator:
         }
 
         self.base_speed = 50.0
-
-
+    
+    def __init__(self):
+    # Current fuel prices in Auckland (NZD per liter)
+    self.fuel_prices = self._load_fuel_prices()  # This calls your new method
+    
+    # Vehicle efficiency (km per liter or km per kWh for EVs)
+    self.vehicle_efficiency = {
+        'small_car': 15.0,
+        'medium_car': 12.0,
+        'large_car': 9.0,
+        'suv': 10.0,
+        'truck_ute': 8.0,
+        'ev_small': 6.5,
+        'ev_medium': 5.5,
+        'ev_large': 4.5
+    }
+    
+    # Auckland-specific costs (NZD)
+    self.auckland_costs = {
+        'hourly_wage': 25.0,
+        'vehicle_depreciation': 0.15,
+        'maintenance_cost': 0.08,
+        'insurance_cost': 0.05,
+        'registration_cost': 0.03, 
+        'parking_downtown': 8.0,
+        'parking_suburban': 3.0,
+    }
+    
+    # ... rest of your __init__ code ...
     
     @lru_cache(maxsize=128)
     def calculate_distance(self, start_coords: Tuple[float, float], 

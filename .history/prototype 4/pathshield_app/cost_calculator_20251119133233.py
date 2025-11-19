@@ -70,8 +70,6 @@ class AucklandDrivingCostCalculator:
         }
 
         self.base_speed = 50.0
-
-
     
     @lru_cache(maxsize=128)
     def calculate_distance(self, start_coords: Tuple[float, float], 
@@ -257,7 +255,7 @@ def estimate_toll_costs(self, start_coords: Tuple[float, float],
     
     return toll_cost
     
-def compare_vehicles(self,
+   def compare_vehicles(self,
                     start_coords: Tuple[float, float],
                     end_coords: Tuple[float, float],
                     time_of_day: str = 'midday') -> Dict:

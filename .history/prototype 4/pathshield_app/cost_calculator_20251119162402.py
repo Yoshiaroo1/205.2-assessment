@@ -29,6 +29,8 @@ class AucklandDrivingCostCalculator:
             'ev_charging': 0.28
         }
 
+        def _load_fuel_prices(self) -> Dict:
+       """Load fuel prices from environment with defaults"""
         
         # Vehicle efficiency (km per liter or km per kWh for EVs)
         self.vehicle_efficiency = {
@@ -70,7 +72,6 @@ class AucklandDrivingCostCalculator:
         }
 
         self.base_speed = 50.0
-
 
     
     @lru_cache(maxsize=128)

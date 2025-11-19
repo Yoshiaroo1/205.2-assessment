@@ -70,7 +70,9 @@ class AucklandDrivingCostCalculator:
         }
 
         self.base_speed = 50.0
-
+    
+    def _load_fuel_prices(self) -> Dict:
+       """Load fuel prices from environment with defaults"""
 
     
     @lru_cache(maxsize=128)
