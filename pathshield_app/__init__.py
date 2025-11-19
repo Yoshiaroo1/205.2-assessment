@@ -16,4 +16,7 @@ def create_app():
     from pathshield_app import routes
     app.register_blueprint(routes.main_bp)
 
+
+
     return app
+
