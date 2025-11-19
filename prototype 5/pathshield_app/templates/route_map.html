@@ -1,0 +1,329 @@
+<!DOCTYPE html>
+<html>
+<head>
+    
+    <meta http-equiv="content-type" content="text/html; charset=UTF-8" />
+    
+        <script>
+            L_NO_TOUCH = false;
+            L_DISABLE_3D = false;
+        </script>
+    
+    <style>html, body {width: 100%;height: 100%;margin: 0;padding: 0;}</style>
+    <style>#map {position:absolute;top:0;bottom:0;right:0;left:0;}</style>
+    <script src="https://cdn.jsdelivr.net/npm/leaflet@1.9.3/dist/leaflet.js"></script>
+    <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.2/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Leaflet.awesome-markers/2.0.2/leaflet.awesome-markers.js"></script>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/leaflet@1.9.3/dist/leaflet.css"/>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.2.2/dist/css/bootstrap.min.css"/>
+    <link rel="stylesheet" href="https://netdna.bootstrapcdn.com/bootstrap/3.0.0/css/bootstrap-glyphicons.css"/>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.2.0/css/all.min.css"/>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/Leaflet.awesome-markers/2.0.2/leaflet.awesome-markers.css"/>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/python-visualization/folium/folium/templates/leaflet.awesome.rotate.min.css"/>
+    
+            <meta name="viewport" content="width=device-width,
+                initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+            <style>
+                #map_cc13b4a002c1f8cac0afb21d68608f06 {
+                    position: relative;
+                    width: 100.0%;
+                    height: 100.0%;
+                    left: 0.0%;
+                    top: 0.0%;
+                }
+                .leaflet-container { font-size: 1rem; }
+            </style>
+        
+</head>
+<body>
+    
+    
+            <div class="folium-map" id="map_cc13b4a002c1f8cac0afb21d68608f06" ></div>
+        
+
+        <!-- Cost Panel Styles -->
+            <style>
+            .cost-panel {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: white;
+            padding: 15px;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.2);
+            z-index: 1000;
+            max-width: 300px;
+            border-left: 4px solid #28a745;
+            }
+            .cost-panel h4 {
+            margin-top: 0;
+            color: #28a745;
+            border-bottom: 1px solid #eee;
+            padding-bottom: 8px;
+            }
+            .cost-breakdown {
+            margin-top: 10px;
+            }
+            .cost-item {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 5px;
+            padding: 3px 0;
+            border-bottom: 1px dotted #eee;
+            }
+            .cost-total {
+            font-weight: bold;
+            font-size: 1.1em;
+            color: #28a745;
+            border-top: 2px solid #28a745;
+            margin-top: 8px;
+            padding-top: 8px;
+            }
+            .vehicle-selector {
+            margin-bottom: 10px;
+            }
+            .vehicle-selector select {
+            width: 100%;
+            padding: 5px;
+            border-radius: 4px;
+            border: 1px solid #ddd;
+            }
+            </style>
+
+        <!-- Cost Panel -->
+        <div id="cost-panel" class="cost-panel">
+            <h4>Route Cost Analysis</h4>
+            <div class="vehicle-selector">
+            <label for="vehicle-type">Vehicle Type:</label>
+            <select id="vehicle-type">
+            <option value="small_car">Small Car</option>
+            <option value="medium_car" selected>Medium Car</option>
+            <option value="large_car">Large Car</option>
+            <option value="suv">SUV</option>
+            <option value="truck_ute">Truck/Ute</option>
+            <option value="ev_small">Small EV</option>
+            <option value="ev_medium">Medium EV</option>
+            <option value="ev_large">Large EV</option>
+            </select>
+            </div>
+            <div id="cost-details">
+            <div class="cost-item">
+            <span>Distance:</span>
+            <span id="cost-distance">-</span>
+            </div>
+            <div class="cost-item">
+            <span>Travel Time:</span>
+            <span id="cost-time">-</span>
+            </div>
+            <div class="cost-breakdown">
+            <div class="cost-item">
+            <span>Fuel Cost:</span>
+            <span id="cost-fuel">-</span>
+            </div>
+            <div class="cost-item">
+            <span>Time Cost:</span>
+            <span id="cost-time-value">-</span>
+            </div>
+            <div class="cost-item">
+            <span>Operating Costs:</span>
+            <span id="cost-operating">-</span>
+            </div>
+            <div class="cost-item">
+            <span>Toll Costs:</span>
+            <span id="cost-toll">-</span>
+            </div>
+            </div>
+            <div class="cost-item cost-total">
+            <span>Total Cost:</span>
+            <span id="cost-total">- NZD</span>
+            </div>
+            <div class="cost-item">
+            <span>Cost per km:</span>
+            <span id="cost-per-km">-</span>
+            </div>
+            </div>
+            <div id="cost-loading" style="display: none; text-align: center;">
+            <div class="spinner-border spinner-border-sm" role="status">
+            <span class="visually-hidden">Loading...</span>
+            </div>
+            <span style="margin-left: 5px;">Calculating costs...</span>
+            </div>
+        </div>
+
+        <!-- Compute New Route Button -->
+        <div style="position:fixed; bottom:20px; right:20px; z-index:9999; background: white;
+            padding: 15px;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.2);
+            border-left: 4px solid #28a745; font-color: #000000;">
+            <a style="font-size:60px;" href="/map">Compute New Route</a>
+        </div>
+
+        <script>
+        // Populate cost fields with server-calculated values (initial load)
+        document.addEventListener("DOMContentLoaded", function() {
+            try {
+            document.getElementById('cost-distance').innerText = "13.30 km";
+            document.getElementById('cost-time').innerText = "19.7 min";
+            document.getElementById('cost-fuel').innerText = "$3.79";
+            document.getElementById('cost-toll').innerText = "$2.40";
+            document.getElementById('cost-total').innerText = "$6.19 NZD";
+            document.getElementById('cost-per-km').innerText = "$0.47/km";
+            } catch (e) {
+            console.warn("Could not populate cost panel:", e);
+            }
+        });
+        </script>
+        
+</body>
+<script>
+    
+    
+            var map_cc13b4a002c1f8cac0afb21d68608f06 = L.map(
+                "map_cc13b4a002c1f8cac0afb21d68608f06",
+                {
+                    center: [-36.8485539, 174.6542157],
+                    crs: L.CRS.EPSG3857,
+                    ...{
+  "zoom": 13,
+  "zoomControl": true,
+  "preferCanvas": false,
+}
+
+                }
+            );
+
+            
+
+        
+    
+            var tile_layer_d9df70c6865074db0dcbf6cfc1f05ef2 = L.tileLayer(
+                "https://tile.openstreetmap.org/{z}/{x}/{y}.png",
+                {
+  "minZoom": 0,
+  "maxZoom": 19,
+  "maxNativeZoom": 19,
+  "noWrap": false,
+  "attribution": "\u0026copy; \u003ca href=\"https://www.openstreetmap.org/copyright\"\u003eOpenStreetMap\u003c/a\u003e contributors",
+  "subdomains": "abc",
+  "detectRetina": false,
+  "tms": false,
+  "opacity": 1,
+}
+
+            );
+        
+    
+            tile_layer_d9df70c6865074db0dcbf6cfc1f05ef2.addTo(map_cc13b4a002c1f8cac0afb21d68608f06);
+        
+    
+            var poly_line_62e946e8234e6ad8769f709bd28748d0 = L.polyline(
+                [[-36.8467909, 174.6542891], [-36.847185, 174.6524461], [-36.846972, 174.6523341], [-36.846975, 174.6517344], [-36.8469609, 174.6514232], [-36.8484705, 174.6512887], [-36.8492474, 174.6513276], [-36.8494263, 174.651312], [-36.8497325, 174.6512022], [-36.8526628, 174.6509738], [-36.8548383, 174.6513321], [-36.8550651, 174.651485], [-36.855957, 174.6519797], [-36.8560142, 174.6520034], [-36.858842, 174.6558863], [-36.8620326, 174.6635426], [-36.8717617, 174.6807946], [-36.8716261, 174.6945944], [-36.8722494, 174.7047539], [-36.8713376, 174.7108436], [-36.8686755, 174.7246118], [-36.8680485, 174.7331313], [-36.8656792, 174.7499606], [-36.8637869, 174.7520496], [-36.8616053, 174.7544524], [-36.8598353, 174.7608394], [-36.8612425, 174.763409], [-36.8637434, 174.7659184], [-36.8681654, 174.7692554], [-36.8699678, 174.7716448], [-36.8774499, 174.7821998], [-36.878658, 174.7833407], [-36.8871954, 174.7937019], [-36.8885108, 174.7973106], [-36.8887935, 174.7977012], [-36.8891917, 174.7970094], [-36.8899658, 174.795404], [-36.8906022, 174.7942811], [-36.8904111, 174.79445]],
+                {"bubblingMouseEvents": true, "color": "#ee0000", "dashArray": null, "dashOffset": null, "fill": false, "fillColor": "#ee0000", "fillOpacity": 0.2, "fillRule": "evenodd", "lineCap": "round", "lineJoin": "round", "noClip": false, "opacity": 0.6, "smoothFactor": 1.0, "stroke": true, "weight": 6}
+            ).addTo(map_cc13b4a002c1f8cac0afb21d68608f06);
+        
+    
+            poly_line_62e946e8234e6ad8769f709bd28748d0.bindTooltip(
+                `<div>
+                     Original route
+                 </div>`,
+                {
+  "sticky": true,
+}
+            );
+        
+    
+            var poly_line_edd51de6280855d84c60d09ed81adae4 = L.polyline(
+                [[-36.8467909, 174.6542891], [-36.847185, 174.6524461], [-36.846972, 174.6523341], [-36.846975, 174.6517344], [-36.8469609, 174.6514232], [-36.8484705, 174.6512887], [-36.8492474, 174.6513276], [-36.8494263, 174.651312], [-36.8497325, 174.6512022], [-36.8526628, 174.6509738], [-36.8548383, 174.6513321], [-36.8550651, 174.651485], [-36.855957, 174.6519797], [-36.8560142, 174.6520034], [-36.858842, 174.6558863], [-36.8620326, 174.6635426], [-36.8717617, 174.6807946], [-36.8716261, 174.6945944], [-36.8722494, 174.7047539], [-36.8713376, 174.7108436], [-36.8686755, 174.7246118], [-36.8679004, 174.7291299], [-36.8675478, 174.7290049], [-36.867478, 174.7289237], [-36.8673786, 174.7290693], [-36.8674512, 174.729143], [-36.8678521, 174.72955], [-36.8680485, 174.7331313], [-36.8656792, 174.7499606], [-36.8618253, 174.7534983], [-36.8614699, 174.7539234], [-36.8623042, 174.7545545], [-36.8628433, 174.7559949], [-36.8628344, 174.7565995], [-36.8629921, 174.7573845], [-36.8631209, 174.7579603], [-36.8632647, 174.7586141], [-36.8634154, 174.7592928], [-36.8635337, 174.7598267], [-36.8636032, 174.760121], [-36.8637703, 174.760911], [-36.8637905, 174.7610315], [-36.863929, 174.761251], [-36.8640368, 174.7613427], [-36.8640797, 174.7614107], [-36.8643889, 174.7626425], [-36.8645747, 174.763555], [-36.8646881, 174.7641121], [-36.8649909, 174.7655483], [-36.8651612, 174.7663563], [-36.8653245, 174.7671312], [-36.8653586, 174.7672928], [-36.8656413, 174.767501], [-36.8681654, 174.7692554], [-36.8699678, 174.7716448], [-36.8774499, 174.7821998], [-36.878658, 174.7833407], [-36.8810267, 174.7860734], [-36.8815599, 174.7865903], [-36.8817402, 174.7864884], [-36.8819015, 174.786247], [-36.8822543, 174.7856086], [-36.8824065, 174.7853722], [-36.8826611, 174.784999], [-36.8841487, 174.7863657], [-36.8848174, 174.7870618], [-36.8854955, 174.7877665], [-36.8856276, 174.7879015], [-36.8864767, 174.7887861], [-36.8865917, 174.7889029], [-36.8876171, 174.7901807], [-36.8881559, 174.7909168], [-36.8884166, 174.7912743], [-36.8887494, 174.7917233], [-36.890261, 174.7937903], [-36.8904111, 174.79445]],
+                {"bubblingMouseEvents": true, "color": "green", "dashArray": null, "dashOffset": null, "fill": false, "fillColor": "green", "fillOpacity": 0.2, "fillRule": "evenodd", "lineCap": "round", "lineJoin": "round", "noClip": false, "opacity": 0.8, "smoothFactor": 1.0, "stroke": true, "weight": 6}
+            ).addTo(map_cc13b4a002c1f8cac0afb21d68608f06);
+        
+    
+            poly_line_edd51de6280855d84c60d09ed81adae4.bindTooltip(
+                `<div>
+                     ML-adjusted route
+                 </div>`,
+                {
+  "sticky": true,
+}
+            );
+        
+    
+            var marker_482e1045d0632440871253409344f7dc = L.marker(
+                [-36.8485539, 174.6542157],
+                {
+}
+            ).addTo(map_cc13b4a002c1f8cac0afb21d68608f06);
+        
+    
+            var icon_a6f632d1e7480eb0b3570a28c40f87d9 = L.AwesomeMarkers.icon(
+                {
+  "markerColor": "green",
+  "iconColor": "white",
+  "icon": "info-sign",
+  "prefix": "glyphicon",
+  "extraClasses": "fa-rotate-0",
+}
+            );
+        
+    
+        var popup_1319d4e49442cc401b471bef475e8321 = L.popup({
+  "maxWidth": "100%",
+});
+
+        
+            
+                var html_5d09418c00463bef9a4e2f10e4605d09 = $(`<div id="html_5d09418c00463bef9a4e2f10e4605d09" style="width: 100.0%; height: 100.0%;">Origin</div>`)[0];
+                popup_1319d4e49442cc401b471bef475e8321.setContent(html_5d09418c00463bef9a4e2f10e4605d09);
+            
+        
+
+        marker_482e1045d0632440871253409344f7dc.bindPopup(popup_1319d4e49442cc401b471bef475e8321)
+        ;
+
+        
+    
+    
+                marker_482e1045d0632440871253409344f7dc.setIcon(icon_a6f632d1e7480eb0b3570a28c40f87d9);
+            
+    
+            var marker_49a6478209f077c70eb4d9129273bc08 = L.marker(
+                [-36.8901859, 174.7943918],
+                {
+}
+            ).addTo(map_cc13b4a002c1f8cac0afb21d68608f06);
+        
+    
+            var icon_ec6fe7c4f205054906a4cd02499d2f68 = L.AwesomeMarkers.icon(
+                {
+  "markerColor": "red",
+  "iconColor": "white",
+  "icon": "info-sign",
+  "prefix": "glyphicon",
+  "extraClasses": "fa-rotate-0",
+}
+            );
+        
+    
+        var popup_e8cb048aa701a9078c4fd18d751a65d8 = L.popup({
+  "maxWidth": "100%",
+});
+
+        
+            
+                var html_109cdb280511eea1f770243bc0737a98 = $(`<div id="html_109cdb280511eea1f770243bc0737a98" style="width: 100.0%; height: 100.0%;">Destination</div>`)[0];
+                popup_e8cb048aa701a9078c4fd18d751a65d8.setContent(html_109cdb280511eea1f770243bc0737a98);
+            
+        
+
+        marker_49a6478209f077c70eb4d9129273bc08.bindPopup(popup_e8cb048aa701a9078c4fd18d751a65d8)
+        ;
+
+        
+    
+    
+                marker_49a6478209f077c70eb4d9129273bc08.setIcon(icon_ec6fe7c4f205054906a4cd02499d2f68);
+            
+</script>
+</html>
