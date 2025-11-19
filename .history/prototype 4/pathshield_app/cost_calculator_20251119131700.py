@@ -13,9 +13,6 @@ class AucklandDrivingCostCalculator:
     """
     
     def __init__(self):
-        import logging
-        self.logger = logging.getLogger(__name__)
-        self.logger.setLevel(logging.DEBUG)
         """
         Initialize the driving cost calculator with Auckland-specific data
         """
@@ -225,33 +222,26 @@ class AucklandDrivingCostCalculator:
             'kwh_used': fuel_calc['kwh_used']
         }
     
-def estimate_toll_costs(self, start_coords: Tuple[float, float],
-                      end_coords: Tuple[float, float]) -> float:
-    """
-    Enhanced toll logic - check if route might pass through toll areas
-    """
-    toll_cost = 0
-    start_lat, start_lon = start_coords
-    end_lat, end_lon = end_coords
-    
-    # Northern Gateway Toll (check if route crosses the toll area)
-    northern_gateway_bounds = {
-        'min_lat': -36.9, 'max_lat': -36.6,
-        'min_lon': 174.4, 'max_lon': 174.8
-    }
-    
-    # Check if either start OR end is in toll area
-    start_in_toll = (northern_gateway_bounds['min_lat'] <= start_lat <= northern_gateway_bounds['max_lat'] and
-                    northern_gateway_bounds['min_lon'] <= start_lon <= northern_gateway_bounds['max_lon'])
-    
-    end_in_toll = (northern_gateway_bounds['min_lat'] <= end_lat <= northern_gateway_bounds['max_lat'] and
-                  northern_gateway_bounds['min_lon'] <= end_lon <= northern_gateway_bounds['max_lon'])
-    
-    # If route involves the toll area, add toll cost
-    if start_in_toll or end_in_toll:
-        toll_cost += self.toll_roads['northern_gateway']
-    
-    return toll_cost
+    def estimate_toll_costs(self, start_coords: Tuple[float, float],
+                          end_coords: Tuple[float, float]) -> float:
+        """
+        Estimate toll costs for a route in Auckland
+        """
+        toll_cost = 0
+
+        northern_gateway_bounds = {
+            'min_lat': -36.9, 'max_lat': -36.6,
+            'min_lon': 174.4, 'max_lon': 174.8
+        }
+        
+        start_lat, start_lon = start_coords
+        end_lat, end_lon = end_coords
+        
+        if (northern_gateway_bounds['min_lat'] <= start_lat <= northern_gateway_bounds['max_lat'] and
+            northern_gateway_bounds['min_lon'] <= start_lon <= northern_gateway_bounds['max_lon']):
+            toll_cost += self.toll_roads['northern_gateway']
+        
+        return toll_cost
     
     def compare_vehicles(self,
                         start_coords: Tuple[float, float],
