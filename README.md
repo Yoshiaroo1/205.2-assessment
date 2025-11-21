@@ -15,6 +15,7 @@ Current python packages to be installed by pip are listed below:
 -	Numpy
 -	Dotenv
 -	sklearn
+
 once these are installed in the project’s environment, we can continue to run the application.
 Running the Application
 The application hosts on a local host server. To start the server, run “run.py” in the prototype 5 folder, then put http://127.0.0.1:5000 in your chrome or preferred browsers search bar while the program is running.
